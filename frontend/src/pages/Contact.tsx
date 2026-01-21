@@ -38,21 +38,55 @@ const cardHover: Variants = {
 
 export function Contact() {
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     phone: '',
     subject: '',
     message: ''
   });
 
+
+  
+
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Contact form:', formData);
-    alert('Thank you for contacting us! We will get back to you within 24 hours.');
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  // setLoading(true);
+  // setError("");
+  // setSuccess("");
+
+  try {
+    const res = await fetch("http://localhost:3000/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Something went wrong");
+    }
+
+    // setSuccess("Message sent successfully!");
+     setFormData({
+      fullName: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+    });
+  } catch (err) {
+    // setError(err.message);
+  } finally {
+    // setLoading(false);
+    alert("Your message has been sent successfully!");
+  }
+};
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -177,11 +211,11 @@ export function Contact() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name *</Label>
+                    <Label htmlFor="fullName">Full Name *</Label>
                     <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
+                      id="fullName"
+                      name="fullName"
+                      value={formData.fullName}
                       onChange={handleChange}
                       required
                       placeholder="Enter your name"

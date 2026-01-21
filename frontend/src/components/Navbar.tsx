@@ -88,6 +88,7 @@ export function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 src={logo}
+                sizes='50px'
                 alt="Loans Buzz"
                 className={`w-auto object-contain transition-all duration-300 ${
                     isScrolled ? 'h-16 md:h-20' : 'h-20 md:h-24'

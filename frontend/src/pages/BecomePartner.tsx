@@ -3,7 +3,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
-import { 
+import {
   CheckCircle2,
   Home,
   Briefcase,
@@ -41,10 +41,10 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 // --- Animation Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" }
   }
 };
 
@@ -61,38 +61,85 @@ const staggerContainer: Variants = {
 
 const cardHover: Variants = {
   rest: { scale: 1, y: 0 },
-  hover: { 
-    scale: 1.02, 
+  hover: {
+    scale: 1.02,
     y: -5,
-    transition: { type: "spring", stiffness: 400, damping: 25 } 
+    transition: { type: "spring", stiffness: 400, damping: 25 }
   }
 };
 
 export function BecomePartner() {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    city: '',
-    experience: '',
-    message: ''
+    fullName: "",
+    email: "",
+    phone: "",
+    city: "",
+    experience: "",
+    panNumber: "",
+    aadhaarNumber: "",
+    message: "",
   });
+
+
 
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
-    alert('Thank you for your interest! Our team will contact you soon.');
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const res = await fetch("http://localhost:3000/api/partner", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    alert("Partner request submitted successfully");
+    setFormData({
+      fullName: "",
+      email: "",
+      phone: "",
+      city: "",
+      experience: "",
+      panNumber: "",
+      aadhaarNumber: "",
+      message: "",
+    });
+  } else {
+    alert(data.error || "Something went wrong");
+  }
+};
+
+
+  const handleChange = (
+  e: React.ChangeEvent<
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  >
+) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+
+
 
   const benefits = [
     'Unlimited earning potential',
@@ -279,27 +326,28 @@ export function BecomePartner() {
       <section className="bg-gradient-to-br from-primary/10 via-white to-secondary/10 py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <motion.h1 
-              variants={fadeInUp} 
-              initial="hidden" 
-              animate="visible" 
+            <motion.h1
+              variants={fadeInUp}
+              initial="hidden"
+              animate="visible"
               className="text-4xl md:text-5xl font-bold mb-6"
             >
               Start Your Loan Distribution Business
             </motion.h1>
-            <motion.p 
-              variants={fadeInUp} 
-              initial="hidden" 
-              animate="visible" 
+            <motion.p
+              variants={fadeInUp}
+              initial="hidden"
+              animate="visible"
               transition={{ delay: 0.2 }}
               className="text-xl text-muted-foreground mb-2"
-            >
+            >Partner Registration
+
               Become a DSA partner with Loans Buzz and start earning from day one.
             </motion.p>
-            <motion.p 
-              variants={fadeInUp} 
-              initial="hidden" 
-              animate="visible" 
+            <motion.p
+              variants={fadeInUp}
+              initial="hidden"
+              animate="visible"
               transition={{ delay: 0.3 }}
               className="text-lg text-muted-foreground"
             >
@@ -311,7 +359,7 @@ export function BecomePartner() {
 
       {/* Join Us as a DSA Partner */}
       <section className="py-16 md:py-20 bg-white">
-        <motion.div 
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -321,13 +369,13 @@ export function BecomePartner() {
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Join Us as a DSA Partner</h2>
           <div className="space-y-4 text-lg text-muted-foreground">
             <p>
-              Welcome to <strong>Loans Buzz</strong> - India's leading online DSA registration and loan distribution 
-              platform. With over 25 years of experience in the financial services sector, we connect borrowers with 
+              Welcome to <strong>Loans Buzz</strong> - India's leading online DSA registration and loan distribution
+              platform. With over 25 years of experience in the financial services sector, we connect borrowers with
               275+ partner banks and NBFCs across the country.
             </p>
             <p>
-              Our DSA partners earn attractive commissions by distributing a wide range of financial products including 
-              home loans, personal loans, business loans, credit cards, and insurance. With presence in 4,000+ cities 
+              Our DSA partners earn attractive commissions by distributing a wide range of financial products including
+              home loans, personal loans, business loans, credit cards, and insurance. With presence in 4,000+ cities
               and a proven track record, we provide the perfect platform to build your loan distribution business.
             </p>
           </div>
@@ -337,7 +385,7 @@ export function BecomePartner() {
       {/* Who is a DSA */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -345,25 +393,25 @@ export function BecomePartner() {
           >
             Who is a DSA?
           </motion.h2>
-          
+
           <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
             <Card className="p-8">
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  A <strong>Direct Selling Agent (DSA)</strong> is an authorized intermediary who acts as a bridge between 
-                  borrowers and lending institutions. DSAs play a crucial role in the lending ecosystem by identifying 
-                  potential customers, guiding them through the loan application process, and facilitating successful 
+                  A <strong>Direct Selling Agent (DSA)</strong> is an authorized intermediary who acts as a bridge between
+                  borrowers and lending institutions. DSAs play a crucial role in the lending ecosystem by identifying
+                  potential customers, guiding them through the loan application process, and facilitating successful
                   loan disbursals.
                 </p>
-                
+
                 <p>
-                  DSAs work on a <strong>commission-based earning model</strong> - they earn a percentage of the loan 
-                  amount as commission for every successful loan disbursal. This makes it a lucrative business opportunity 
+                  DSAs work on a <strong>commission-based earning model</strong> - they earn a percentage of the loan
+                  amount as commission for every successful loan disbursal. This makes it a lucrative business opportunity
                   with unlimited income potential.
                 </p>
                 <div className="bg-primary/10 p-6 rounded-lg border border-primary/20 mt-6">
                   <p className="font-semibold text-foreground">
-                    The role requires no inventory, no infrastructure investment, and offers complete flexibility in working 
+                    The role requires no inventory, no infrastructure investment, and offers complete flexibility in working
                     hours and location - making it an ideal entrepreneurial opportunity.
                   </p>
                 </div>
@@ -376,7 +424,7 @@ export function BecomePartner() {
       {/* Responsibilities of a DSA Partner */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -384,8 +432,8 @@ export function BecomePartner() {
           >
             Responsibilities of a DSA Partner
           </motion.h2>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -414,7 +462,7 @@ export function BecomePartner() {
       {/* Loan Products You Can Offer */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-secondary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -425,7 +473,7 @@ export function BecomePartner() {
               Earn commissions across a diverse range of financial products
             </p>
           </motion.div>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -452,7 +500,7 @@ export function BecomePartner() {
       {/* Who Can Become a Partner */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -463,8 +511,8 @@ export function BecomePartner() {
               We welcome motivated professionals from all backgrounds. No strict qualifications required.
             </p>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -489,7 +537,7 @@ export function BecomePartner() {
       {/* DSA Registration Process */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -500,10 +548,10 @@ export function BecomePartner() {
               Simple 5-step process to start your partnership journey
             </p>
           </motion.div>
-          
-          
 
-          <motion.div 
+
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -532,7 +580,7 @@ export function BecomePartner() {
       {/* Why Partner With Loans Buzz */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -540,7 +588,7 @@ export function BecomePartner() {
           >
             Why Partner With Loans Buzz?
           </motion.h2>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -565,7 +613,7 @@ export function BecomePartner() {
       {/* Partner Advantages / Lifestyle Benefits */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-secondary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -576,7 +624,7 @@ export function BecomePartner() {
               Build the lifestyle and career you've always wanted
             </p>
           </motion.div>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -593,7 +641,7 @@ export function BecomePartner() {
                   <p className="text-sm text-muted-foreground">{benefit.description}</p>
                   {benefit.title === 'Unlimited Earning Potential' && (
                     <div className="mt-4 text-xs text-primary">
-                        
+
                     </div>
                   )}
                 </Card>
@@ -606,7 +654,7 @@ export function BecomePartner() {
       {/* Documents Required */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -637,7 +685,7 @@ export function BecomePartner() {
       {/* FAQs */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -645,7 +693,7 @@ export function BecomePartner() {
           >
             Frequently Asked Questions
           </motion.h2>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -668,7 +716,7 @@ export function BecomePartner() {
                   </button>
                   <AnimatePresence>
                     {openFAQ === index && (
-                      <motion.div 
+                      <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -693,7 +741,7 @@ export function BecomePartner() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Benefits */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -736,7 +784,7 @@ export function BecomePartner() {
             </motion.div>
 
             {/* Form */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -815,6 +863,48 @@ export function BecomePartner() {
                       <option value="5+">5+ years</option>
                     </select>
                   </div>
+
+                  {/* DOCUMENTS REQUIRED */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">
+                      Documents Required for Registration
+                    </h3>
+
+                    {/* PAN CARD */}
+                    <div className="space-y-2">
+                      <Label htmlFor="panFile">PAN Card *</Label>
+                      <Input
+                        id="panFile"
+                        name="panNumber"
+                        type="text"
+                    
+                        onChange={handleChange}
+                        required
+                        className="bg-slate-50"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Mandatory for all applicants
+                      </p>
+                    </div>
+
+                    {/* AADHAAR CARD */}
+                    <div className="space-y-2">
+                      <Label htmlFor="aadhaarFile">Aadhaar Card *</Label>
+                      <Input
+                        id="aadhaarFile"
+                        name="aadhaarNumber"
+                        type="text"
+                        onChange={handleChange}
+                        required
+                        className="bg-slate-50"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        For individual applicants
+                      </p>
+                    </div>
+                    
+                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="message">Tell us about yourself (Optional)</Label>
