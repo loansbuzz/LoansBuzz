@@ -3,6 +3,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
+import { useRef } from "react";
 import {
   CheckCircle2,
   Home,
@@ -37,6 +38,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { toast } from 'sonner';
 
 // --- Animation Variants ---
 const fadeInUp: Variants = {
@@ -81,51 +83,62 @@ export function BecomePartner() {
   });
 
 
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const formRef = useRef<HTMLDivElement | null>(null);
 
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [loading, setloading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
+    setloading(true);
 
-  const res = await fetch("http://localhost:3000/api/partner", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(formData),
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    alert("Partner request submitted successfully");
-    setFormData({
-      fullName: "",
-      email: "",
-      phone: "",
-      city: "",
-      experience: "",
-      panNumber: "",
-      aadhaarNumber: "",
-      message: "",
+    const res = await fetch("http://localhost:3000/api/partner", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
     });
-  } else {
-    alert(data.error || "Something went wrong");
-  }
-};
+    await delay(2000); // your 2 sec loader
+
+    const data = await res.json();
+
+    if (data.success) {
+      setloading(false);
+
+      toast.success("Message sent successfully!", {
+        description: "Our team will contact you within 24 hours.",
+      });
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        city: "",
+        experience: "",
+        panNumber: "",
+        aadhaarNumber: "",
+        message: "",
+      });
+    } else {
+      toast.error("Something went wrong", {
+        description: "Please try again later.",
+      });
+    }
+  };
 
 
   const handleChange = (
-  e: React.ChangeEvent<
-    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-  >
-) => {
-  const { name, value } = e.target;
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -323,6 +336,37 @@ export function BecomePartner() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       {/* Hero Section */}
+
+      {/* 🔥 FIXED CTA BUTTON */}
+      {/* 🔥 FIXED VERTICAL CENTER CTA */}
+      {/* Centered Floating Button Container */}
+      <div className="fixed top-50 bottom-10 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        <button
+          onClick={() =>
+            formRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            })
+          }
+          className="
+            pointer-events-auto
+            px-8 py-3
+            bg-primary
+            text-white
+            rounded-full
+            font-bold
+            text-lg
+            shadow-2xl
+            hover:bg-primary/90
+            hover:-translate-y-1
+            active:scale-95
+            transition-all
+            duration-300
+          "
+        >
+          Fill the Form
+        </button>
+      </div>
       <section className="bg-gradient-to-br from-primary/10 via-white to-secondary/10 py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
@@ -790,7 +834,7 @@ export function BecomePartner() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl font-bold mb-6">Partner Registration</h2>
+              <h2 className="text-3xl font-bold mb-6" ref={formRef}>Partner Registration</h2>
               <Card className="p-8 shadow-xl border-t-4 border-t-primary">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
@@ -877,7 +921,7 @@ export function BecomePartner() {
                         id="panFile"
                         name="panNumber"
                         type="text"
-                    
+                        value={formData.panNumber}
                         onChange={handleChange}
                         required
                         className="bg-slate-50"
@@ -894,6 +938,7 @@ export function BecomePartner() {
                         id="aadhaarFile"
                         name="aadhaarNumber"
                         type="text"
+                        value={formData.aadhaarNumber}
                         onChange={handleChange}
                         required
                         className="bg-slate-50"
@@ -902,7 +947,7 @@ export function BecomePartner() {
                         For individual applicants
                       </p>
                     </div>
-                    
+
                   </div>
 
 
@@ -919,8 +964,44 @@ export function BecomePartner() {
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-6">
-                    Submit Application
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={loading}
+                    className={`w-full text-lg py-6 shadow-lg transition-all duration-300
+    ${loading
+                        ? "bg-primary text-white opacity-90 cursor-not-allowed"
+                        : "bg-primary hover:bg-primary/90 text-white shadow-primary/20 hover:shadow-primary/40"
+                      }
+  `}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2 text-white">
+                        <svg
+                          className="w-5 h-5 animate-spin text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            d="M4 12a8 8 0 018-8"
+                            strokeWidth="4"
+                          />
+                        </svg>
+                        Sending...
+                      </span>
+                    ) : (
+                      "Send Message"
+                    )}
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center">

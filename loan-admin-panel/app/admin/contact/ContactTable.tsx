@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link"; // ✅ Import Link
 import { useMemo, useState } from "react";
 import { Search, Filter, Mail, Phone, ArrowUpRight, FileText, X, Send, ArrowLeft, Loader2, Calendar } from "lucide-react"; // ✅ Added ArrowLeft
+import { toast } from "sonner";
 
 type Message = {
   _id: string;
@@ -23,12 +24,12 @@ const getInitials = (name: string) => {
 
 export default function ContactTable({ messages }: { messages: Message[] }) {
   const router = useRouter();
-  
+
   // --- STATES ---
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "REPLIED">("ALL");
   const [subjectFilter, setSubjectFilter] = useState("ALL");
-  
+
   // Modal States
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -43,9 +44,9 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
         msg.email.toLowerCase().includes(query) ||
         msg.phone.includes(query);
       const matchesStatus = statusFilter === "ALL" || msg.status === statusFilter;
-      const matchesSubject = 
-        subjectFilter === "ALL" || 
-        msg.subject.toLowerCase().includes(subjectFilter.replace(/-/g, " ").toLowerCase()) || 
+      const matchesSubject =
+        subjectFilter === "ALL" ||
+        msg.subject.toLowerCase().includes(subjectFilter.replace(/-/g, " ").toLowerCase()) ||
         msg.subject.toLowerCase() === subjectFilter.toLowerCase();
 
       return matchesSearch && matchesStatus && matchesSubject;
@@ -78,11 +79,18 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
       });
 
       if (res.ok) {
-        router.refresh(); 
+        router.refresh();
         handleCloseModal();
-        alert("Reply sent successfully!");
+        // alert("Reply sent successfully!");
+        toast.success("Message sent successfully!", {
+          duration:3000
+          // description: "Our team will contact you within 24 hours.",
+        });
       } else {
-        alert("Failed to send reply. Please try again.");
+        toast.error("Something went wrong", {
+          description: "Please try again later.",
+          duration:3000
+        });
       }
     } catch (error) {
       console.error(error);
@@ -95,13 +103,13 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
   return (
     <>
       <div className="w-full bg-white rounded-2xl border border-gray-100 shadow-xl shadow-gray-100/50 overflow-hidden">
-        
+
         {/* HEADER */}
         <div className="p-6 border-b border-gray-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="flex flex-col">
             {/* ✅ NEW BACK BUTTON */}
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 mb-2 transition-colors w-fit"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
@@ -127,9 +135,9 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
 
             {/* Subject Filter */}
             <div className="relative">
-               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <FileText className="w-4 h-4 text-gray-500" />
-               </div>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <FileText className="w-4 h-4 text-gray-500" />
+              </div>
               <select
                 value={subjectFilter}
                 onChange={(e) => setSubjectFilter(e.target.value)}
@@ -148,9 +156,9 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
 
             {/* Status Filter */}
             <div className="relative">
-               <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <Filter className="w-4 h-4 text-gray-500" />
-               </div>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <Filter className="w-4 h-4 text-gray-500" />
+              </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
@@ -193,7 +201,7 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 font-medium">
                       <span className="inline-block bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
-                          {msg.subject}
+                        {msg.subject}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -209,14 +217,12 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                        msg.status === "PENDING"
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${msg.status === "PENDING"
                           ? "bg-amber-50 text-amber-700 border-amber-200"
                           : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          msg.status === "PENDING" ? "bg-amber-500" : "bg-emerald-500"
-                        }`} />
+                        }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${msg.status === "PENDING" ? "bg-amber-500" : "bg-emerald-500"
+                          }`} />
                         {msg.status === "PENDING" ? "Pending Review" : "Resolved"}
                       </span>
                     </td>
@@ -230,9 +236,9 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
                           <ArrowUpRight className="w-3.5 h-3.5" />
                         </button>
                       ) : (
-                         <div className="text-gray-400 inline-flex items-center justify-end">
-                           <span className="text-xs bg-gray-100 px-2 py-1 rounded-md">Replied</span>
-                         </div>
+                        <div className="text-gray-400 inline-flex items-center justify-end">
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded-md">Replied</span>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -242,7 +248,7 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
                   <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center">
                       <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                          <Search className="w-6 h-6 text-gray-300" />
+                        <Search className="w-6 h-6 text-gray-300" />
                       </div>
                       <p className="text-gray-900 font-medium">No messages found</p>
                     </div>
@@ -257,7 +263,7 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
       {/* ================= REPLY MODAL ================= */}
       {selectedMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all duration-300">
-          <div 
+          <div
             className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
@@ -268,13 +274,13 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
                   {getInitials(selectedMessage.fullName)}
                 </div>
                 <div>
-                   <h3 className="text-lg font-semibold text-gray-900">Reply to {selectedMessage.fullName}</h3>
-                   <p className="text-xs text-gray-500 flex items-center gap-2">
-                     <Mail className="w-3 h-3" /> {selectedMessage.email}
-                   </p>
+                  <h3 className="text-lg font-semibold text-gray-900">Reply to {selectedMessage.fullName}</h3>
+                  <p className="text-xs text-gray-500 flex items-center gap-2">
+                    <Mail className="w-3 h-3" /> {selectedMessage.email}
+                  </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={handleCloseModal}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
               >
@@ -284,7 +290,7 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
 
             {/* Modal Body (Scrollable) */}
             <div className="p-6 overflow-y-auto custom-scrollbar">
-              
+
               {/* Customer Message Card */}
               <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
                 <div className="flex items-center gap-2 mb-2">
@@ -341,7 +347,7 @@ export default function ContactTable({ messages }: { messages: Message[] }) {
                       ) : (
                         <>
                           <Send className="w-4 h-4" /> Send Reply
-                          {alert("Reply sent successfully!")}
+
                         </>
                       )}
                     </button>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Mail, Users, ArrowRight, LayoutDashboard } from "lucide-react";
+import { Bell, Mail, Users, ArrowRight, LayoutDashboard, Shield } from "lucide-react";
 
 export default function Home() {
   return (
@@ -92,7 +92,27 @@ export default function Home() {
             </div>
           </Link>
 
-         
+          {/* INSURANCE APPLICATIONS CARD (New Section) */}
+          <Link
+            href="/admin/insurance"
+            className="group relative bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300 ease-in-out hover:-translate-y-1"
+          >
+             <div className="flex items-start justify-between">
+              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Shield className="w-7 h-7" />
+              </div>
+              <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-colors" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+                Insurance Applications
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed">
+                Track insurance quote requests, review policy types, and manage customer coverage details.
+              </p>
+            </div>
+          </Link>
 
         </div>
       </div>

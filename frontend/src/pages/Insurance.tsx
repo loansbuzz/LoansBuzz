@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
-import { 
-  Heart, 
-  Shield, 
-  Building2, 
-  CheckCircle2, 
-  Users, 
-  Clock, 
+import {
+  Heart,
+  Shield,
+  Building2,
+  CheckCircle2,
+  Users,
+  Clock,
   IndianRupee,
   Car,
   Home,
@@ -30,14 +30,15 @@ import {
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { motion, Variants } from 'framer-motion';
+import { toast } from 'sonner';
 
 // --- Animation Variants ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" }
   }
 };
 
@@ -54,16 +55,16 @@ const staggerContainer: Variants = {
 
 const cardHover: Variants = {
   rest: { scale: 1, y: 0 },
-  hover: { 
-    scale: 1.02, 
+  hover: {
+    scale: 1.02,
     y: -5,
-    transition: { type: "spring", stiffness: 400, damping: 25 } 
+    transition: { type: "spring", stiffness: 400, damping: 25 }
   }
 };
 
 export function Insurance() {
   const [contactForm, setContactForm] = useState({
-    name: '',
+    fullName: '',
     phone: '',
     email: '',
     insuranceType: ''
@@ -283,11 +284,57 @@ export function Insurance() {
       description: 'Avail deductions under sections 80C, 80D of Income Tax Act'
     }
   ];
+  const [loading, setloading] = useState<boolean>(false);
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', contactForm);
+
+    try {
+      setloading(true);
+
+      console.log("Submitting form:", contactForm);
+
+      const res = await fetch("http://localhost:3000/api/insurance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contactForm),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit form");
+      }
+      await delay(2000); // your 2 sec loader
+
+      // ✅ Success toast
+      toast.success("Message sent successfully!", {
+        duration: 2000,
+      });
+
+      // ✅ Clear form
+      setContactForm({
+        fullName: "",
+        email: "",
+        phone: "",
+        insuranceType: "",
+
+      });
+
+    } catch (error: any) {
+      console.error("CONTACT_FORM_ERROR:", error);
+
+      toast.error(error.message || "Something went wrong", {
+        duration: 2000,
+      });
+    } finally {
+      setloading(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen overflow-x-hidden">
@@ -295,7 +342,7 @@ export function Insurance() {
       <section className="bg-gradient-to-br from-primary/10 via-white to-secondary/10 py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div 
+            <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
@@ -305,7 +352,7 @@ export function Insurance() {
                 Protect What Matters Most
               </motion.h1>
               <motion.p variants={fadeInUp} className="text-xl text-muted-foreground">
-                Comprehensive insurance solutions to safeguard your family, health, and assets. 
+                Comprehensive insurance solutions to safeguard your family, health, and assets.
                 Compare and choose from 50+ leading insurance providers.
               </motion.p>
               <motion.div variants={fadeInUp}>
@@ -314,14 +361,14 @@ export function Insurance() {
                 </Button>
               </motion.div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
               className="relative h-64 md:h-96 lg:h-[400px]"
             >
-              <ImageWithFallback 
+              <ImageWithFallback
                 src="https://images.unsplash.com/photo-1659352786973-82ae3af461a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbnN1cmFuY2UlMjBwcm90ZWN0aW9uJTIwZmFtaWx5fGVufDF8fHx8MTc2NzkwMzQ4M3ww&ixlib=rb-4.1.0&q=80&w=1080"
                 alt="Insurance Protection"
                 className="w-full h-full object-cover rounded-2xl shadow-xl"
@@ -332,7 +379,7 @@ export function Insurance() {
       </section>
 
       {/* Insurance Inquiry Form */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -351,8 +398,8 @@ export function Insurance() {
                 <input
                   type="text"
                   required
-                  value={contactForm.name}
-                  onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                  value={contactForm.fullName}
+                  onChange={(e) => setContactForm({ ...contactForm, fullName: e.target.value })}
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                   placeholder="Enter your name"
                 />
@@ -388,17 +435,54 @@ export function Insurance() {
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all bg-white"
                 >
                   <option value="">Select insurance type</option>
-                  <option value="life">Life Insurance</option>
-                  <option value="health">Health Insurance</option>
-                  <option value="motor">Motor Insurance</option>
-                  <option value="home">Home Insurance</option>
-                  <option value="travel">Travel Insurance</option>
+                  <option value="Life Insurance">Life Insurance</option>
+                  <option value="Health Insurance">Health Insurance</option>
+                  <option value="Motor Insurance">Motor Insurance</option>
+                  <option value="Home Insurance">Home Insurance</option>
+                  <option value="Travel Insurance">Travel Insurance</option>
                 </select>
+
               </div>
               <div className="md:col-span-2">
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-6">
-                  Submit Inquiry
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={loading}
+                  className={`w-full text-lg py-6 shadow-lg transition-all duration-300
+    ${loading
+                      ? "bg-primary text-white opacity-90 cursor-not-allowed"
+                      : "bg-primary hover:bg-primary/90 text-white shadow-primary/20 hover:shadow-primary/40"
+                    }
+  `}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2 text-white">
+                      <svg
+                        className="w-5 h-5 animate-spin text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          d="M4 12a8 8 0 018-8"
+                          strokeWidth="4"
+                        />
+                      </svg>
+                      Sending...
+                    </span>
+                  ) : (
+                    "Submit Form"
+                  )}
                 </Button>
+
               </div>
             </form>
           </Card>
@@ -407,7 +491,7 @@ export function Insurance() {
 
       {/* Insurance in India - Introduction */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-primary/5">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -416,21 +500,21 @@ export function Insurance() {
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">Insurance in India: Check & Compare</h2>
           <div className="space-y-4 text-lg text-muted-foreground text-center">
             <p>
-              Insurance has become an essential part of financial planning for millions of Indian families. With rising 
-              healthcare costs, increasing life uncertainties, and growing asset values, having the right insurance coverage 
+              Insurance has become an essential part of financial planning for millions of Indian families. With rising
+              healthcare costs, increasing life uncertainties, and growing asset values, having the right insurance coverage
               is no longer optional—it's a necessity.
             </p>
             <p>
-              India's insurance sector offers a wide array of products designed to meet diverse needs—from protecting your 
-              family's future to securing your health, vehicles, home, and business. With over 50+ insurance providers in 
+              India's insurance sector offers a wide array of products designed to meet diverse needs—from protecting your
+              family's future to securing your health, vehicles, home, and business. With over 50+ insurance providers in
               the market, comparing policies and making informed decisions can be overwhelming.
             </p>
             <p>
-              At Loans Buzz, we simplify this process by providing unbiased comparisons, expert guidance, and complete 
+              At Loans Buzz, we simplify this process by providing unbiased comparisons, expert guidance, and complete
               transparency—helping you choose the best insurance coverage for your unique requirements.
             </p>
           </div>
-          
+
         </motion.div>
       </section>
 
@@ -446,17 +530,17 @@ export function Insurance() {
             <Card className="p-8">
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  <strong>Insurance</strong> is a financial arrangement that provides protection against potential future losses 
-                  or unforeseen events. It is a contract (called a policy) between an individual or organization (the policyholder) 
+                  <strong>Insurance</strong> is a financial arrangement that provides protection against potential future losses
+                  or unforeseen events. It is a contract (called a policy) between an individual or organization (the policyholder)
                   and an insurance company (the insurer).
                 </p>
                 <p>
-                  Under this contract, the policyholder pays a regular amount called a <strong>premium</strong> to the insurance 
-                  company. In return, the insurer agrees to compensate the policyholder financially if a covered event—such as 
+                  Under this contract, the policyholder pays a regular amount called a <strong>premium</strong> to the insurance
+                  company. In return, the insurer agrees to compensate the policyholder financially if a covered event—such as
                   illness, accident, death, or property damage—occurs.
                 </p>
-                
-                <motion.div 
+
+                <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
@@ -487,7 +571,7 @@ export function Insurance() {
       {/* How Does Insurance Work */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-secondary/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -495,15 +579,15 @@ export function Insurance() {
           >
             How Does Insurance Work?
           </motion.h2>
-          
+
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
             <Card className="p-8">
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  Insurance operates on the principle of <strong>risk pooling</strong> and <strong>risk sharing</strong>. 
+                  Insurance operates on the principle of <strong>risk pooling</strong> and <strong>risk sharing</strong>.
                   Here's how it works in simple terms:
                 </p>
-                
+
 
                 <div className="space-y-6 mt-6">
                   {[
@@ -523,13 +607,13 @@ export function Insurance() {
                     </motion.div>
                   ))}
                 </div>
-                
-                <motion.div 
+
+                <motion.div
                   variants={fadeInUp}
                   className="bg-secondary/10 p-6 rounded-lg border border-secondary/20 mt-6"
                 >
                   <p className="font-semibold text-foreground">
-                    In essence, insurance is a collective safety net where everyone contributes a small amount to protect 
+                    In essence, insurance is a collective safety net where everyone contributes a small amount to protect
                     each other from large, unexpected financial losses.
                   </p>
                 </motion.div>
@@ -542,7 +626,7 @@ export function Insurance() {
       {/* Key Insurance Concepts */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -550,8 +634,8 @@ export function Insurance() {
           >
             Key Insurance Concepts
           </motion.h2>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -566,7 +650,7 @@ export function Insurance() {
                 </div>
                 <div className="space-y-3 text-muted-foreground">
                   <p>
-                    An <strong>insurance premium</strong> is the amount you pay to the insurance company to keep your 
+                    An <strong>insurance premium</strong> is the amount you pay to the insurance company to keep your
                     policy active. It is the price of your insurance coverage.
                   </p>
                   <p>
@@ -592,12 +676,12 @@ export function Insurance() {
                 </div>
                 <div className="space-y-3 text-muted-foreground">
                   <p>
-                    An <strong>insurance claim</strong> is a formal request made by the policyholder to 
+                    An <strong>insurance claim</strong> is a formal request made by the policyholder to
                     the insurance company for compensation or coverage for a covered loss or event.
                   </p>
-                  
 
-[Image of insurance claim process flow chart]
+
+                  [Image of insurance claim process flow chart]
 
                   <p>
                     When you experience an event covered by your policy, the claim process typically involves:
@@ -620,7 +704,7 @@ export function Insurance() {
       {/* Insurance Products */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -631,8 +715,8 @@ export function Insurance() {
               Insurance in India is broadly categorized into three main types, each designed to protect different aspects of your life
             </p>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -670,7 +754,7 @@ export function Insurance() {
       {/* Life Insurance Section */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -682,17 +766,17 @@ export function Insurance() {
             <Card className="p-8">
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  <strong>Life Insurance</strong> is a financial product that provides a lump sum payment to your 
-                  beneficiaries (usually family members) in the event of your death. It ensures that your loved ones 
+                  <strong>Life Insurance</strong> is a financial product that provides a lump sum payment to your
+                  beneficiaries (usually family members) in the event of your death. It ensures that your loved ones
                   are financially secure even in your absence.
                 </p>
                 <p>
-                  Life insurance serves multiple purposes: it replaces lost income, pays off debts and mortgages, covers 
+                  Life insurance serves multiple purposes: it replaces lost income, pays off debts and mortgages, covers
                   funeral expenses, funds children's education, and provides long-term financial stability to dependents.
                 </p>
                 <p>
-                  In India, life insurance policies offer <strong>tax benefits under Section 80C</strong> for premium 
-                  payments and <strong>Section 10(10D)</strong> for maturity proceeds, making them an attractive tool for 
+                  In India, life insurance policies offer <strong>tax benefits under Section 80C</strong> for premium
+                  payments and <strong>Section 10(10D)</strong> for maturity proceeds, making them an attractive tool for
                   both protection and tax planning.
                 </p>
               </div>
@@ -704,7 +788,7 @@ export function Insurance() {
       {/* Types of Life Insurance Plans */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-secondary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -712,7 +796,7 @@ export function Insurance() {
           >
             Types of Life Insurance Plans
           </motion.h2>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -755,16 +839,16 @@ export function Insurance() {
             <Card className="p-8">
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  <strong>General Insurance</strong> provides coverage for assets and properties other than life. It protects 
-                  you against financial losses arising from damage to or loss of your belongings, vehicles, home, business, 
+                  <strong>General Insurance</strong> provides coverage for assets and properties other than life. It protects
+                  you against financial losses arising from damage to or loss of your belongings, vehicles, home, business,
                   and other valuable possessions.
                 </p>
                 <p>
-                  Unlike life insurance, general insurance policies are typically short-term (usually one year) and need to 
+                  Unlike life insurance, general insurance policies are typically short-term (usually one year) and need to
                   be renewed annually. They cover specific risks as mentioned in the policy document.
                 </p>
                 <p>
-                  General insurance operates on the principle of <strong>indemnity</strong>—meaning the insurer compensates 
+                  General insurance operates on the principle of <strong>indemnity</strong>—meaning the insurer compensates
                   you for the actual loss incurred, up to the sum insured.
                 </p>
               </div>
@@ -776,7 +860,7 @@ export function Insurance() {
       {/* Types of General Insurance Plans */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -784,7 +868,7 @@ export function Insurance() {
           >
             Types of General Insurance Plans
           </motion.h2>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -827,15 +911,15 @@ export function Insurance() {
             <Card className="p-8">
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  <strong>Health Insurance</strong> is a type of insurance that covers medical and surgical expenses incurred 
+                  <strong>Health Insurance</strong> is a type of insurance that covers medical and surgical expenses incurred
                   by the insured. It provides financial protection against the rising costs of healthcare in India.
                 </p>
                 <p>
-                  With hospitalization costs increasing by 10-15% annually, health insurance has become essential for every 
+                  With hospitalization costs increasing by 10-15% annually, health insurance has become essential for every
                   family. It ensures that you can access quality medical treatment without depleting your savings.
                 </p>
                 <p>
-                  Additionally, health insurance premiums qualify for <strong>tax deductions under Section 80D</strong> of the 
+                  Additionally, health insurance premiums qualify for <strong>tax deductions under Section 80D</strong> of the
                   Income Tax Act.
                 </p>
               </div>
@@ -847,7 +931,7 @@ export function Insurance() {
       {/* Health Insurance Coverage Details */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-secondary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -855,7 +939,7 @@ export function Insurance() {
           >
             Health Insurance Coverage
           </motion.h2>
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -882,7 +966,7 @@ export function Insurance() {
       {/* Important Aspects & Advantages */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -894,7 +978,7 @@ export function Insurance() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -914,7 +998,7 @@ export function Insurance() {
             ))}
           </motion.div>
 
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -923,7 +1007,7 @@ export function Insurance() {
             Advantages of Buying Insurance
           </motion.h2>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -947,13 +1031,13 @@ export function Insurance() {
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-gradient-to-r from-primary to-secondary relative overflow-hidden">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 0.1 }}
           transition={{ duration: 1.5 }}
           className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"
         />
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}

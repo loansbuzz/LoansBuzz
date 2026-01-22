@@ -1,8 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
 import Link from "next/link"; // ✅ Import Link
-import { ArrowLeft} from "lucide-react"; // ✅ Added ArrowLeft
-
+import { ArrowLeft } from "lucide-react"; // ✅ Added ArrowLeft
+import { toast } from "sonner";
 
 // --- Visual Helpers ---
 const getInitials = (name: string) =>
@@ -73,57 +73,57 @@ export default function PartnerTable({ partners }: any) {
 
   return (
     <div className="space-y-6 p-1">
-      
+
       {/* 🔹 HEADER & FILTERS */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-end md:items-center">
         <div>
-          <Link 
-              href="/" 
-              className="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 mb-2 transition-colors w-fit"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back to Home
-            </Link>
-           <h1 className="text-2xl font-bold text-gray-900">Partner 's Connections</h1>
-           <p className="text-gray-500 text-sm mt-1">Manage and track your latest inquiries.</p>
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 mb-2 transition-colors w-fit"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back to Home
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Partner 's Connections</h1>
+          <p className="text-gray-500 text-sm mt-1">Manage and track your latest inquiries.</p>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-3">
-         {/* Search Bar */}
-         <div className="relative flex-grow md:max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-         </div>
+        {/* Search Bar */}
+        <div className="relative flex-grow md:max-w-md">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-         {/* Filters */}
-         <select 
-            value={subjectFilter}
-            onChange={(e) => setSubjectFilter(e.target.value)}
-            className="py-2.5 px-4 border border-gray-200 rounded-lg bg-white text-sm text-gray-600 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-         >
-            {uniqueSubjects.map((s:any) => <option key={s} value={s}>{s}</option>)}
-         </select>
+        {/* Filters */}
+        <select
+          value={subjectFilter}
+          onChange={(e) => setSubjectFilter(e.target.value)}
+          className="py-2.5 px-4 border border-gray-200 rounded-lg bg-white text-sm text-gray-600 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+        >
+          {uniqueSubjects.map((s: any) => <option key={s} value={s}>{s}</option>)}
+        </select>
 
-         <select 
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="py-2.5 px-4 border border-gray-200 rounded-lg bg-white text-sm text-gray-600 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-         >
-            <option>All Status</option>
-            <option value="Resolved">Resolved</option>
-            <option value="Pending">Pending</option>
-         </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="py-2.5 px-4 border border-gray-200 rounded-lg bg-white text-sm text-gray-600 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+        >
+          <option>All Status</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Pending">Pending</option>
+        </select>
       </div>
 
       {/* 🔹 TABLE SECTION */}
@@ -166,11 +166,11 @@ export default function PartnerTable({ partners }: any) {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex flex-col space-y-1">
                     <div className="flex items-center text-sm text-gray-500">
-                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                       {p.email}
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
-                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                       {p.phone}
                     </div>
                   </div>
@@ -203,9 +203,9 @@ export default function PartnerTable({ partners }: any) {
               </tr>
             ))}
             {filteredPartners.length === 0 && (
-                <tr>
-                    <td colSpan={5} className="text-center py-8 text-gray-400 text-sm">No partners found.</td>
-                </tr>
+              <tr>
+                <td colSpan={5} className="text-center py-8 text-gray-400 text-sm">No partners found.</td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -215,23 +215,23 @@ export default function PartnerTable({ partners }: any) {
       {selectedPartner && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn m-4">
-            
+
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-start">
               <div className="flex items-center gap-3">
-                 <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${getAvatarColor(selectedPartner.fullName)}`}>
-                    {getInitials(selectedPartner.fullName)}
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-gray-900">Reply to {selectedPartner.fullName}</h2>
-                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        {selectedPartner.email}
-                    </p>
-                  </div>
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${getAvatarColor(selectedPartner.fullName)}`}>
+                  {getInitials(selectedPartner.fullName)}
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-gray-900">Reply to {selectedPartner.fullName}</h2>
+                  <p className="text-xs text-gray-500 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    {selectedPartner.email}
+                  </p>
+                </div>
               </div>
-              <button 
-                onClick={() => setSelectedPartner(null)} 
+              <button
+                onClick={() => setSelectedPartner(null)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -240,22 +240,22 @@ export default function PartnerTable({ partners }: any) {
 
             {/* Modal Body */}
             <div className="p-6 space-y-6">
-              
+
               {/* Original Message Block */}
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    <span>Original Message</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        {formatDate(selectedPartner.createdAt)}
-                    </span>
+                  <span>Original Message</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    {formatDate(selectedPartner.createdAt)}
+                  </span>
                 </div>
                 <div className="text-sm font-semibold text-gray-900 mb-1">
-                    {selectedPartner.city || "Inquiry"}
+                  {selectedPartner.city || "Inquiry"}
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                   {selectedPartner.message || "No message content."}
+                  {selectedPartner.message || "No message content."}
                 </p>
               </div>
 
@@ -280,7 +280,7 @@ export default function PartnerTable({ partners }: any) {
               >
                 Cancel
               </button>
-              
+
               {/* BUTTON WITH YOUR EXACT LOGIC */}
               <button
                 disabled={loading}
@@ -295,12 +295,18 @@ export default function PartnerTable({ partners }: any) {
                     }
                   );
                   selectedPartner.status = "REPLIED";
+                  // alert("Reply sent successfully!");
+                  toast.success("Message sent successfully!", {
+                    // description: "Our team will contact you within 24 hours.",
+                    duration:3000
+                  });
+
                   setSelectedPartner(null);
                   setLoading(false);
                 }}
                 className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition-all"
               >
-                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                 {loading ? "Sending..." : "Send Reply"}
               </button>
             </div>

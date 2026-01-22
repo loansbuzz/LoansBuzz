@@ -5,14 +5,16 @@ import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { Phone, Mail, MapPin, Clock, Shield, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
+import { Toaster } from "sonner";
+import { toast } from 'sonner';
 
 // --- Animation Variants (Consistent with Home Page) ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" }
   }
 };
 
@@ -29,10 +31,10 @@ const staggerContainer: Variants = {
 
 const cardHover: Variants = {
   rest: { scale: 1, y: 0 },
-  hover: { 
-    scale: 1.02, 
+  hover: {
+    scale: 1.02,
     y: -5,
-    transition: { type: "spring", stiffness: 400, damping: 25 } 
+    transition: { type: "spring", stiffness: 400, damping: 25 }
   }
 };
 
@@ -46,46 +48,51 @@ export function Contact() {
   });
 
 
-  
+
+
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-
-  const handleSubmit = async (e) => {
+  const [loading, setLoading] = useState(false);
+const handleSubmit = async (e) => {
   e.preventDefault();
-  // setLoading(true);
-  // setError("");
-  // setSuccess("");
 
   try {
+    setLoading(true);
+
     const res = await fetch("http://localhost:3000/api/contact", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     });
 
     const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
 
-    if (!res.ok) {
-      throw new Error(data.error || "Something went wrong");
-    }
+    await delay(2000); // your 2 sec loader
 
-    // setSuccess("Message sent successfully!");
-     setFormData({
+    setFormData({
       fullName: "",
       email: "",
       phone: "",
       subject: "",
       message: "",
+      
     });
+
+    toast.success("Message sent successfully!", {
+      description: "Our team will contact you within 24 hours.",
+    });
+
   } catch (err) {
-    // setError(err.message);
+    toast.error("Something went wrong", {
+      description: "Please try again later.",
+    });
   } finally {
-    // setLoading(false);
-    alert("Your message has been sent successfully!");
+    setLoading(false);
   }
 };
+
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -128,9 +135,9 @@ export function Contact() {
       <section className="bg-gradient-to-br from-primary/10 via-white to-secondary/10 py-16 md:py-24 relative overflow-hidden">
         {/* Abstract Background Element */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div 
+          <motion.div
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
@@ -149,7 +156,7 @@ export function Contact() {
       {/* Contact Info Cards */}
       <section className="py-12 bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -157,8 +164,8 @@ export function Contact() {
             className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {contactInfo.map((info, index) => (
-              <motion.div 
-                key={index} 
+              <motion.div
+                key={index}
                 variants={fadeInUp}
               >
                 <motion.div
@@ -188,7 +195,7 @@ export function Contact() {
       {/* Contact Form */}
       <section className="py-16 md:py-24 bg-white relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -289,9 +296,45 @@ export function Contact() {
                   />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90 text-lg py-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300">
-                  Send Message
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={loading}
+                  className={`w-full text-lg py-6 shadow-lg transition-all duration-300
+    ${loading
+                      ? "bg-primary text-white opacity-90 cursor-not-allowed"
+                      : "bg-primary hover:bg-primary/90 text-white shadow-primary/20 hover:shadow-primary/40"
+                    }
+  `}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2 text-white">
+                      <svg
+                        className="w-5 h-5 animate-spin text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          d="M4 12a8 8 0 018-8"
+                          strokeWidth="4"
+                        />
+                      </svg>
+                      Sending...
+                    </span>
+                  ) : (
+                    "Send Message"
+                  )}
                 </Button>
+
               </form>
             </Card>
           </motion.div>
@@ -301,7 +344,7 @@ export function Contact() {
       {/* Map or Additional Info */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -314,7 +357,7 @@ export function Contact() {
               { val: '25+ Years', title: 'Industry Experience', sub: 'Trusted expertise', color: 'text-primary' }
             ].map((item, i) => (
               <motion.div key={i} variants={fadeInUp}>
-                 <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
+                <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
                   <Card className="p-8 border-none shadow-md hover:shadow-xl transition-all">
                     <div className={`text-3xl font-bold ${item.color} mb-2`}>{item.val}</div>
                     <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
@@ -365,7 +408,7 @@ export function Contact() {
       {/* Contact FAQs */}
       <section className="py-16 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -373,8 +416,8 @@ export function Contact() {
           >
             Frequently Asked Questions
           </motion.h2>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -396,15 +439,15 @@ export function Contact() {
                   )}
                 </button>
                 {openFAQ === 0 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="px-6 pb-6"
                   >
                     <p className="text-muted-foreground">
-                      Our support team responds to all inquiries within 24 hours during business days (Monday-Saturday). 
-                      For urgent loan or credit-related queries, you can call our toll-free number for immediate assistance 
+                      Our support team responds to all inquiries within 24 hours during business days (Monday-Saturday).
+                      For urgent loan or credit-related queries, you can call our toll-free number for immediate assistance
                       during business hours (9:00 AM - 7:00 PM).
                     </p>
                   </motion.div>
@@ -427,15 +470,15 @@ export function Contact() {
                   )}
                 </button>
                 {openFAQ === 1 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="px-6 pb-6"
                   >
                     <p className="text-muted-foreground">
-                      For loan inquiries, credit cards, insurance, or mutual fund questions, please use <strong>info@loansbuzz.com</strong>. 
-                      For technical support or website-related issues, use <strong>support@loansbuzz.com</strong>. 
+                      For loan inquiries, credit cards, insurance, or mutual fund questions, please use <strong>info@loansbuzz.com</strong>.
+                      For technical support or website-related issues, use <strong>support@loansbuzz.com</strong>.
                       Alternatively, you can fill out the contact form above with the appropriate subject for faster routing.
                     </p>
                   </motion.div>
@@ -458,15 +501,15 @@ export function Contact() {
                   )}
                 </button>
                 {openFAQ === 2 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="px-6 pb-6"
                   >
                     <p className="text-muted-foreground">
-                      No, Loans Buzz does not charge customers for consultations, enquiries, or advisory services. 
-                      Our expert guidance on loans, credit cards, insurance, and mutual funds is completely free. 
+                      No, Loans Buzz does not charge customers for consultations, enquiries, or advisory services.
+                      Our expert guidance on loans, credit cards, insurance, and mutual funds is completely free.
                       We earn commissions from partner banks and financial institutions upon successful loan disbursal or product enrollment.
                     </p>
                   </motion.div>
