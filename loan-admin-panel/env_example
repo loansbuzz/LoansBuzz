@@ -1,0 +1,4 @@
+MONGODB_URI=url
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+ADMIN_EMAIL=email
+ADMIN_EMAIL_PASS=app password
