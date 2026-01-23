@@ -1,6 +1,7 @@
 import { connectDB } from "../../lib/mongos";
 import ContactMessage from "../../lib/models/ContactMessage";
 import ContactTable from "./ContactTable";
+export const dynamic = "force-dynamic";
 
 export default async function ContactMessagesPage() {
   await connectDB();
