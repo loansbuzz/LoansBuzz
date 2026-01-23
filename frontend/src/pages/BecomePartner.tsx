@@ -88,12 +88,13 @@ export function BecomePartner() {
 
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [loading, setloading] = useState<boolean>(false);
+  const API_BASE_URL = "https://loansbuzz.vercel.app";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setloading(true);
 
-    const res = await fetch("http://localhost:3000/api/partner", {
+    const res = await fetch(`${API_BASE_URL}/api/partner`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
