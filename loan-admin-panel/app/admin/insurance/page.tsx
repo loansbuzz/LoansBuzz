@@ -2,6 +2,8 @@ import { connectDB } from "@/app/lib/mongos";
 import InsuranceQuote from "@/app/lib/models/InsuranceQuote";
 import InsuranceTable from "./InsuranceTable";
 
+export const dynamic = "force-dynamic";
+
 export default async function InsuranceAdminPage() {
   await connectDB();
 

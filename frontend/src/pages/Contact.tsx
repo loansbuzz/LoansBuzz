@@ -55,7 +55,7 @@ export function Contact() {
 
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {

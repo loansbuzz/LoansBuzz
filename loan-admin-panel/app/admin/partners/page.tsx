@@ -1,6 +1,7 @@
 import { connectDB } from "@/app/lib/mongos";
 import PartnerApplication from "@/app/lib/models/PartnerApplication";
 import PartnerTable from "./PartnerTable";
+export const dynamic = "force-dynamic";
 
 export default async function PartnersPage() {
   await connectDB();
