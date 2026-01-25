@@ -285,6 +285,8 @@ export function Insurance() {
     }
   ];
   const [loading, setloading] = useState<boolean>(false);
+  const API_BASE_URL = "https://loansbuzz.vercel.app";
+
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -295,7 +297,7 @@ export function Insurance() {
 
       console.log("Submitting form:", contactForm);
 
-      const res = await fetch("http://localhost:3000/api/insurance", {
+      const res = await fetch(`${API_BASE_URL}/api/insurance`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

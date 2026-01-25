@@ -51,6 +51,7 @@ export function Contact() {
 
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const API_BASE_URL = "https://loansbuzz.vercel.app";
 
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,7 +61,7 @@ const handleSubmit = async (e) => {
   try {
     setLoading(true);
 
-    const res = await fetch("http://localhost:3000/api/contact", {
+    const res = await fetch(`${API_BASE_URL}/api/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),

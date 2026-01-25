@@ -4,6 +4,7 @@ import App from "./App";
 import "./index.css";
 
 import { Toaster } from "sonner";
+// import VerticalInfoTicker from "./pages/VerticalInfoTicker";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -15,5 +16,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       richColors
       closeButton
     />
+    {/* <VerticalInfoTicker/> */}
   </React.StrictMode>
 );

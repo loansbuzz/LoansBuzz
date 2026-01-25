@@ -14,12 +14,17 @@ import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Grievance } from './pages/Grievance';
+import VerticalInfoTicker from './pages/VerticalInfoTicker';
 
 function App() {
   return (
     <Router>
+      {/* 🔹 FIXED VERTICAL INFO BOX (GLOBAL) */}
+      <VerticalInfoTicker />
+
       <div className="flex flex-col min-h-screen">
         <Navbar />
+
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -38,6 +43,7 @@ function App() {
             <Route path="/grievance" element={<Grievance />} />
           </Routes>
         </main>
+
         <Footer />
       </div>
     </Router>

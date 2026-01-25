@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
+import InfoModal from './model';
 import { 
   Home as HomeIcon, 
   User, 
@@ -26,6 +27,8 @@ import {
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { motion, Variants } from 'framer-motion';
+import { useEffect, useState } from "react";
+import VerticalInfoTicker from './VerticalInfoTicker';
 
 // --- Animation Variants (Fully Typed) ---
 const fadeInUp: Variants = {
@@ -102,7 +105,25 @@ export function Home() {
     { title: 'Refer & Earn', icon: Gift },
   ];
 
+  const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    const accepted = localStorage.getItem("loanbuzz-info-accepted");
+    if (!accepted) {
+      setShowInfo(true);
+    }
+  }, []);
+
   return (
+    <>
+      
+      <InfoModal 
+        showInfo={showInfo} 
+        setShowInfo={setShowInfo} 
+      />
+      {/* <VerticalInfoTicker/> */}
+    
+
     <div className="min-h-screen overflow-x-hidden">
       
       {/* Hero Section */}
@@ -436,5 +457,6 @@ export function Home() {
         </motion.div>
       </section>
     </div>
+    </>
   );
 }
