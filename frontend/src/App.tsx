@@ -15,6 +15,8 @@ import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Grievance } from './pages/Grievance';
 import VerticalInfoTicker from './pages/VerticalInfoTicker';
+import { EMICalculator } from './pages/EMICalculator';
+
 
 function App() {
   return (
@@ -41,6 +43,8 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/grievance" element={<Grievance />} />
+            <Route path="emi-calculator" element={<EMICalculator />} />
+
           </Routes>
         </main>
 
