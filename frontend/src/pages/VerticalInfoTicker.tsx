@@ -2,59 +2,47 @@ import React from "react";
 
 const VerticalInfoTicker = () => {
   return (
-    <div
-      style={{
-        position: "fixed",
-        right: "16px",
-        top: "50%",
-        transform: "translateY(-50%)",
-        zIndex: 9999,
-        width: "220px",
-        height: "200px",
-        backgroundColor: "#16a34a", // green
-        borderRadius: "14px",
-        boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
-        overflow: "hidden",
-        padding: "12px",
-      }}
-    >
-      {/* Scrolling wrapper */}
+    <>
       <div
         style={{
-          position: "absolute",
+          position: "fixed",
+          top: "64px", // adjust if navbar height is different
+          left: 0,
           width: "100%",
-          animation: "verticalScroll 10s linear infinite",
+          background: "#ffffff",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          zIndex: 999,
+          borderTop: "1px solid #f0f0f0",
+          borderBottom: "1px solid #f0f0f0",
         }}
       >
-        <p
+        <div
           style={{
-            color: "#ffffff",
-            fontSize: "14px",
+            display: "inline-block",
+            padding: "12px 0",
+            animation: "scrollText 18s linear infinite",
+            color: "#16a34a",
             fontWeight: 500,
-            lineHeight: "1.6",
-            textAlign: "left",
+            fontSize: "14px",
           }}
         >
           Loans Buzz does not charge customers any fees for loan comparison,
           application, or processing services. All our services are completely
           free for borrowers.
-        </p>
-      </div>
+        </div>
 
-      {/* Keyframes */}
-      <style>
-        {`
-          @keyframes verticalScroll {
-            0% {
-              transform: translateY(100%);
+        <style>
+          {`
+            @keyframes scrollText {
+              from { transform: translateX(100%); }
+              to { transform: translateX(-100%); }
             }
-            100% {
-              transform: translateY(-200%);
-            }
-          }
-        `}
-      </style>
-    </div>
+          `}
+        </style>
+      </div>
+    </>
   );
 };
 
