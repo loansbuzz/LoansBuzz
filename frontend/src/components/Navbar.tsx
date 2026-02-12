@@ -22,6 +22,7 @@ export function Navbar() {
   const primaryNavLinks = [
     { name: 'About Us', path: '/about' },
     { name: 'Loans', path: '/loans' },
+    { name: 'EMI Calculator', path: '/emi-calculator' },
     { name: 'Insurance', path: '/insurance' },
     { name: 'Credit Cards', path: '/credit-cards' },
     { name: 'Mutual Funds', path: '/mutual-funds' },
