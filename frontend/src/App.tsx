@@ -22,12 +22,12 @@ function App() {
   return (
     <Router>
       {/* 🔹 FIXED VERTICAL INFO BOX (GLOBAL) */}
-      <VerticalInfoTicker />
 
       <div className="flex flex-col min-h-screen">
         <Navbar />
+        <VerticalInfoTicker />
 
-        <main className="flex-1">
+          <main className="flex-1 pt-[110px]">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
