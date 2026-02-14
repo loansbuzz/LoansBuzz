@@ -14,14 +14,8 @@ import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Grievance } from './pages/Grievance';
-<<<<<<< HEAD
 import ScrollingNotice from './pages/ScrollingNotice';
 import { EMICalculator } from './pages/EMICalculator';
-=======
-import VerticalInfoTicker from './pages/VerticalInfoTicker';
-import { EMICalculator } from './pages/EMICalculator';
-
->>>>>>> 55ec53b10f30a870b345031071abe76ae7b404bb
 
 function App() {
   return (
@@ -30,15 +24,10 @@ function App() {
 
       <div className="flex flex-col min-h-screen">
         <Navbar />
-<<<<<<< HEAD
         <ScrollingNotice />
 
         <main className="flex-1 pt-[110px]">
-=======
-        <VerticalInfoTicker />
 
-          <main className="flex-1 pt-[110px]">
->>>>>>> 55ec53b10f30a870b345031071abe76ae7b404bb
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
@@ -55,10 +44,6 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/grievance" element={<Grievance />} />
             <Route path="emi-calculator" element={<EMICalculator />} />
-<<<<<<< HEAD
-=======
-
->>>>>>> 55ec53b10f30a870b345031071abe76ae7b404bb
           </Routes>
         </main>
 
