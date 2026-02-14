@@ -326,7 +326,7 @@ export function Loans() {
             </motion.div>
           </div>
         </motion.div>
-      {/* </section>
+      </section>
 
       {/* Sticky Navigation */}
       {/* <nav className={`bg-white border-b border-border transition-all duration-300 ${isNavSticky ? 'sticky top-16 md:top-18 z-40 shadow-md' : ''}`}>
