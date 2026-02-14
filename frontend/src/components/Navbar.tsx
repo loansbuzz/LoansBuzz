@@ -23,10 +23,6 @@ export function Navbar() {
     { name: 'About Us', path: '/about' },
     { name: 'Loans', path: '/loans' },
     { name: 'EMI Calculator', path: '/emi-calculator' },
-<<<<<<< HEAD
-
-=======
->>>>>>> 55ec53b10f30a870b345031071abe76ae7b404bb
     { name: 'Insurance', path: '/insurance' },
     { name: 'Credit Cards', path: '/credit-cards' },
     { name: 'Mutual Funds', path: '/mutual-funds' },
