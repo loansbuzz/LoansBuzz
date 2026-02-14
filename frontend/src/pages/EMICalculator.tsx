@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import { Calculator } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export function EMICalculator() {
-  const FIXED_INTEREST_RATE = 10.5; // % per annum
-
-  const [loanAmount, setLoanAmount] = useState(500000);
+  const [loanAmount, setLoanAmount] = useState(5000000);
+  const [interestRate, setInterestRate] = useState(8.5);
   const [tenure, setTenure] = useState(120);
 
   const [emi, setEmi] = useState(0);
@@ -13,17 +19,21 @@ export function EMICalculator() {
 
   useEffect(() => {
     calculateEMI();
-  }, [loanAmount, tenure]);
+  }, [loanAmount, interestRate, tenure]);
 
   const calculateEMI = () => {
     const P = loanAmount;
     const N = tenure;
-    const R = FIXED_INTEREST_RATE / 12 / 100;
+    const R = interestRate / 12 / 100;
 
-    const emiValue =
-      (P * R * Math.pow(1 + R, N)) /
-      (Math.pow(1 + R, N) - 1);
+    if (R === 0) {
+      setEmi(Math.round(P / N));
+      setTotalPayable(P);
+      setTotalInterest(0);
+      return;
+    }
 
+    const emiValue = (P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1);
     const totalPay = emiValue * N;
     const interest = totalPay - P;
 
@@ -32,98 +42,170 @@ export function EMICalculator() {
     setTotalInterest(Math.round(interest));
   };
 
+  const data = [
+    { name: "Principal Amount", value: loanAmount },
+    { name: "Interest Amount", value: totalInterest },
+  ];
+
+  const COLORS = ["#22c55e", "#0f172a"];
+
+  // Prevents leading zeros by converting to number then back to string
+  const formatInput = (val) => {
+    if (val === 0 || val === "") return "";
+    return Number(val).toString();
+  };
+
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-4xl mx-auto px-4">
+    <section className="py-16 bg-gray-50">
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+          <div className="grid md:grid-cols-2 gap-12">
+            
+            {/* INPUT SECTION */}
+            <div className="space-y-10">
+              {/* Loan Amount */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <label className="font-bold text-gray-700">Loan Amount (₹)</label>
+                  <input 
+                    type="number"
+                    value={formatInput(loanAmount)}
+                    onChange={(e) => setLoanAmount(Number(e.target.value))}
+                    className="w-32 border-b-2 border-green-500 focus:outline-none text-right font-bold text-green-600 bg-transparent text-lg"
+                  />
+                </div>
+                <input
+                  type="range"
+                  min={100000}
+                  max={100000000} 
+                  step={200000}   
+                  value={loanAmount}
+                  onChange={(e) => setLoanAmount(Number(e.target.value))}
+                  className="custom-slider w-full"
 
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="w-14 h-14 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-            <Calculator className="w-7 h-7 text-green-600" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">EMI Calculator</h1>
-          <p className="text-gray-600">
-            Fixed Interest Rate:{" "}
-            <span className="font-semibold text-green-600">
-              {FIXED_INTEREST_RATE}% p.a.
-            </span>
-          </p>
-        </div>
+                />
+                <div className="flex justify-between text-[11px] text-gray-400 mt-2 font-medium">
+                  <span>1L</span>
+                  <span>2.5Cr</span>
+                  <span>5Cr</span>
+                  <span>7.5Cr</span>
+                  <span>10Cr</span>
+                </div>
+              </div>
 
-        {/* Sliders */}
-        <div className="space-y-8">
+              {/* Interest Rate */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <label className="font-bold text-gray-700">Interest Rate (%)</label>
+                  <input 
+                    type="number"
+                    step="0.1"
+                    value={formatInput(interestRate)}
+                    onChange={(e) => setInterestRate(Number(e.target.value))}
+                    className="w-20 border-b-2 border-green-500 focus:outline-none text-right font-bold text-green-600 bg-transparent text-lg"
+                  />
+                </div>
+                <input
+                  type="range"
+                  min={1}
+                  max={30}
+                  step={0.1}
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(Number(e.target.value))}
+                  className="custom-slider w-full"
 
-          {/* Loan Amount Slider */}
-          <div>
-            <div className="flex justify-between mb-2">
-              <label className="font-medium">Loan Amount</label>
-              <span className="font-semibold text-green-600">
-                ₹ {loanAmount.toLocaleString()}
-              </span>
+                />
+                <div className="flex justify-between text-[11px] text-gray-400 mt-2 font-medium">
+                  <span>1%</span>
+                  <span>10%</span>
+                  <span>20%</span>
+                  <span>30%</span>
+                </div>
+              </div>
+
+              {/* Tenure */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <label className="font-bold text-gray-700">Tenure (Months)</label>
+                  <input 
+                    type="number"
+                    value={formatInput(tenure)}
+                    onChange={(e) => setTenure(Number(e.target.value))}
+                    className="w-20 border-b-2 border-green-500 focus:outline-none text-right font-bold text-green-600 bg-transparent text-lg"
+                  />
+                </div>
+                <input
+                  type="range"
+                  min={6}
+                  max={360}
+                  step={2}
+                  value={tenure}
+                  onChange={(e) => setTenure(Number(e.target.value))}
+                  className="custom-slider w-full"
+
+                />
+                <div className="flex justify-between text-[11px] text-gray-400 mt-2 font-medium">
+                  <span>6m</span>
+                  <span>10y</span>
+                  <span>20y</span>
+                  <span>30y</span>
+                </div>
+              </div>
             </div>
-            <input
-              type="range"
-              min={10000}
-              max={5000000}
-              step={100}
-              value={loanAmount}
-              onChange={(e) => setLoanAmount(Number(e.target.value))}
-              className="w-full accent-green-600"
-            />
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>₹10K</span>
-              <span>₹50L</span>
+
+            {/* RESULTS SECTION */}
+            <div className="flex flex-col items-center">
+              <div className="w-full bg-green-50 p-6 rounded-xl text-center mb-8">
+                <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Monthly EMI</p>
+                <p className="text-4xl font-black text-green-700">
+                  ₹ {emi.toLocaleString("en-IN")}
+                </p>
+              </div>
+
+              {/* Pie Chart with Labels */}
+              <div className="h-64 w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data}
+                      innerRadius={70}
+                      outerRadius={95}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {data.map((_, index) => (
+                        <Cell key={index} fill={COLORS[index]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v) => `₹${v.toLocaleString("en-IN")}`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* CHART LEGEND (The Labels) */}
+              <div className="flex justify-center gap-8 mt-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: COLORS[0] }}></div>
+                  <span className="text-sm font-semibold text-gray-600">Principal</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: COLORS[1] }}></div>
+                  <span className="text-sm font-semibold text-gray-600">Interest</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 w-full mt-8">
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 text-center">
+                  <p className="text-[10px] uppercase text-gray-400 font-bold">Total Interest</p>
+                  <p className="font-bold text-gray-700">₹{totalInterest.toLocaleString("en-IN")}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 text-center">
+                  <p className="text-[10px] uppercase text-gray-400 font-bold">Total Payable</p>
+                  <p className="font-bold text-gray-700">₹{totalPayable.toLocaleString("en-IN")}</p>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Tenure Slider */}
-          <div>
-            <div className="flex justify-between mb-2">
-              <label className="font-medium">Loan Tenure</label>
-              <span className="font-semibold text-green-600">
-                {tenure} months
-              </span>
-            </div>
-            <input
-              type="range"
-              min={6}
-              max={360}
-              step={1}
-              value={tenure}
-              onChange={(e) => setTenure(Number(e.target.value))}
-              className="w-full accent-green-600"
-            />
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>6 months</span>
-              <span>30 years</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Results */}
-        <div className="grid md:grid-cols-3 gap-6 mt-12 text-center">
-
-          <div className="p-6 rounded-xl bg-green-50 border">
-            <p className="text-sm text-gray-600 mb-1">Monthly EMI</p>
-            <p className="text-3xl font-bold text-green-700">
-              ₹ {emi.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="p-6 rounded-xl border">
-            <p className="text-sm text-gray-600 mb-1">Total Interest</p>
-            <p className="text-2xl font-semibold">
-              ₹ {totalInterest.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="p-6 rounded-xl border">
-            <p className="text-sm text-gray-600 mb-1">Total Payable</p>
-            <p className="text-2xl font-semibold">
-              ₹ {totalPayable.toLocaleString()}
-            </p>
-          </div>
-
         </div>
       </div>
     </section>

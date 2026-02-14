@@ -193,3 +193,13 @@ html {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+
+@keyframes scaleIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.25s ease-out;
+}

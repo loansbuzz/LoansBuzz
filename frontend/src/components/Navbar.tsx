@@ -22,9 +22,12 @@ export function Navbar() {
   const primaryNavLinks = [
     { name: 'About Us', path: '/about' },
     { name: 'Loans', path: '/loans' },
+    { name: 'EMI Calculator', path: '/emi-calculator' },
+
     { name: 'Insurance', path: '/insurance' },
     { name: 'Credit Cards', path: '/credit-cards' },
     { name: 'Mutual Funds', path: '/mutual-funds' },
+    
   ];
 
   const businessNavLinks = [{ name: 'DSA', path: '/dsa' }];
@@ -89,6 +92,8 @@ export function Navbar() {
                 whileTap={{ scale: 0.95 }}
                 src={logo}
                 sizes='50px'
+                width={150}
+                height={100}
                 alt="Loans Buzz"
                 className={`w-auto object-contain transition-all duration-300 ${
                     isScrolled ? 'h-16 md:h-20' : 'h-20 md:h-24'

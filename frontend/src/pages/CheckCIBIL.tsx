@@ -3,21 +3,22 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
-import { 
-  Shield, CheckCircle2, TrendingUp, AlertCircle, BarChart3, 
-  FileText, Clock, Award, Zap, IndianRupee, Calendar, 
-  CreditCard, Eye, Lightbulb, TrendingDown, Users, 
+import {
+  Shield, CheckCircle2, TrendingUp, AlertCircle, BarChart3,
+  FileText, Clock, Award, Zap, IndianRupee, Calendar,
+  CreditCard, Eye, Lightbulb, TrendingDown, Users,
   ChevronDown, ChevronUp, Wallet, Building2, Percent, Activity
 } from 'lucide-react';
-import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { motion, Variants, AnimatePresence, delay } from 'framer-motion';
+import CibilScoreModal from './CibilScoreModal';
 
 // --- ANIMATION VARIANTS (Consistent Global Styles) ---
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" }
   }
 };
 
@@ -34,43 +35,43 @@ const staggerContainer: Variants = {
 
 const cardHover: Variants = {
   rest: { scale: 1, y: 0 },
-  hover: { 
-    scale: 1.02, 
+  hover: {
+    scale: 1.02,
     y: -5,
-    transition: { type: "spring", stiffness: 400, damping: 25 } 
+    transition: { type: "spring", stiffness: 400, damping: 25 }
   }
 };
 
 // --- STATIC DATA ---
 const SCORE_RANGES = [
-  { 
-    range: '750-900', 
-    status: 'Excellent', 
-    color: 'text-green-600', 
+  {
+    range: '750-900',
+    status: 'Excellent',
+    color: 'text-green-600',
     bgColor: 'bg-green-50',
     description: 'Excellent creditworthiness - highest approval rates and best interest rates',
     approval: 'Very High Approval Chances'
   },
-  { 
-    range: '700-749', 
-    status: 'Good', 
-    color: 'text-blue-600', 
+  {
+    range: '700-749',
+    status: 'Good',
+    color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     description: 'Good credit profile - high approval chances with competitive rates',
     approval: 'High Approval Chances'
   },
-  { 
-    range: '650-699', 
-    status: 'Fair', 
-    color: 'text-yellow-600', 
+  {
+    range: '650-699',
+    status: 'Fair',
+    color: 'text-yellow-600',
     bgColor: 'bg-yellow-50',
     description: 'Fair creditworthiness - moderate approval chances, may face higher rates',
     approval: 'Moderate Approval Chances'
   },
-  { 
-    range: 'Below 650', 
-    status: 'Needs Improvement', 
-    color: 'text-red-600', 
+  {
+    range: 'Below 650',
+    status: 'Needs Improvement',
+    color: 'text-red-600',
     bgColor: 'bg-red-50',
     description: 'Poor credit history - difficult to get approvals, focus on improvement',
     approval: 'Low Approval Chances'
@@ -279,10 +280,15 @@ export function CheckCIBIL() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    phone: '',
+    mobile: '',
     pan: '',
     dob: ''
   });
+
+  const [loading, setLoading] = useState(false);
+  const [scoreData, setScoreData] = useState<any>(null);
+  const [showResult, setShowResult] = useState(false);
+
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -291,7 +297,7 @@ export function CheckCIBIL() {
   // Validation Logic
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     // PAN Regex: 5 letters, 4 numbers, 1 letter (e.g., ABCDE1234F)
     const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     if (!panRegex.test(formData.pan)) {
@@ -300,7 +306,7 @@ export function CheckCIBIL() {
 
     // Phone Regex: 10 digits
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(formData.phone)) {
+    if (!phoneRegex.test(formData.mobile)) {
       newErrors.phone = "Please enter a valid 10-digit mobile number";
     }
 
@@ -312,19 +318,39 @@ export function CheckCIBIL() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (validateForm()) {
-      setIsLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        console.log('CIBIL Check:', formData);
-        alert('Your CIBIL score request has been submitted. You will receive your report via email within 24 hours.');
-        setIsLoading(false);
-      }, 1500);
+    setLoading(true);
+
+    try {
+      // 1️⃣ Register user
+      await fetch("https://api.loansbuzz.in/api/v1/user/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      // 2️⃣ Fetch credit score
+      const res = await fetch(
+        `https://api.loansbuzz.in/api/v1/credit-score/${formData.mobile}`
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        setScoreData(data.data);
+        
+        setShowResult(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -335,10 +361,10 @@ export function CheckCIBIL() {
       ...formData,
       [name]: finalValue
     });
-    
+
     // Clear error for this field
     if (errors[name]) {
-      setErrors(prev => ({...prev, [name]: ''}));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -347,14 +373,18 @@ export function CheckCIBIL() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen w-screen overflow-x-hidden">
+     <CibilScoreModal showResult={showResult} setShowResult={setShowResult} scoreData={scoreData}/>
+
+
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary/10 via-white to-secondary/10 py-16 md:py-24 relative overflow-hidden">
         {/* Abstract Background Shape */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div 
+          <motion.div
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
@@ -367,7 +397,7 @@ export function CheckCIBIL() {
               Check Your CIBIL Score for Free
             </motion.h1>
             <motion.p variants={fadeInUp} className="text-xl text-muted-foreground mb-8">
-              Get your credit score and detailed report in minutes. 
+              Get your credit score and detailed report in minutes.
               No hidden charges, completely secure and confidential.
             </motion.p>
             <motion.div variants={fadeInUp} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -380,7 +410,7 @@ export function CheckCIBIL() {
       </section>
 
       {/* Introductory Context Section */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -389,12 +419,12 @@ export function CheckCIBIL() {
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-lg text-muted-foreground leading-relaxed">
-            <strong>Loans Buzz</strong> is your trusted financial partner offering completely free access to your CIBIL 
-            score and credit report. Whether you're planning to apply for a home loan, personal loan, credit card, or 
+            <strong>Loans Buzz</strong> is your trusted financial partner offering completely free access to your CIBIL
+            score and credit report. Whether you're planning to apply for a home loan, personal loan, credit card, or
             simply want to monitor your financial health, checking your CIBIL score is the first step.
           </p>
           <p className="text-muted-foreground mt-4 leading-relaxed">
-            Our platform connects you with 275+ lenders and provides personalized credit improvement advice to help you 
+            Our platform connects you with 275+ lenders and provides personalized credit improvement advice to help you
             achieve your financial goals. Start your credit journey today with a free CIBIL check.
           </p>
         </div>
@@ -403,7 +433,7 @@ export function CheckCIBIL() {
       {/* What is a CIBIL Score */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -420,22 +450,22 @@ export function CheckCIBIL() {
             <Card className="p-8 shadow-md hover:shadow-xl transition-shadow border-slate-100">
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>
-                  A <strong>CIBIL score</strong> is a three-digit numerical representation of your creditworthiness, 
-                  ranging from <strong>300 to 900</strong>. It is calculated by TransUnion CIBIL, one of India's leading 
+                  A <strong>CIBIL score</strong> is a three-digit numerical representation of your creditworthiness,
+                  ranging from <strong>300 to 900</strong>. It is calculated by TransUnion CIBIL, one of India's leading
                   credit information companies, based on your credit history and repayment behavior.
                 </p>
-                
+
                 {/* Visual Placeholder for layout balance */}
                 <div className="py-4 flex justify-center opacity-80">
-                   {/* Diagram placeholder: Credit Score Factors Chart would go here */}
-                   <div className="w-full max-w-md h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full w-3/4 bg-primary/20"></div>
-                   </div>
+                  {/* Diagram placeholder: Credit Score Factors Chart would go here */}
+                  <div className="w-full max-w-md h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full w-3/4 bg-primary/20"></div>
+                  </div>
                 </div>
 
                 <p>
-                  When you apply for any form of credit - be it a home loan, personal loan, auto loan, or credit card - 
-                  lenders check your CIBIL score to assess the risk of lending to you. A higher score indicates that you 
+                  When you apply for any form of credit - be it a home loan, personal loan, auto loan, or credit card -
+                  lenders check your CIBIL score to assess the risk of lending to you. A higher score indicates that you
                   have been responsible with credit in the past and are more likely to repay on time.
                 </p>
                 <p>
@@ -449,7 +479,7 @@ export function CheckCIBIL() {
                 </ul>
                 <div className="bg-primary/5 p-6 rounded-lg border border-primary/10 mt-6">
                   <p className="font-semibold text-foreground text-center">
-                    A score of 750 or above is considered excellent and gives you access to the best loan offers, 
+                    A score of 750 or above is considered excellent and gives you access to the best loan offers,
                     lowest interest rates, and premium financial products across India's top banks and NBFCs.
                   </p>
                 </div>
@@ -462,7 +492,7 @@ export function CheckCIBIL() {
       {/* Importance of Checking Your CIBIL Score Online */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -473,8 +503,8 @@ export function CheckCIBIL() {
               Regular credit monitoring is essential for maintaining financial health
             </p>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -505,7 +535,7 @@ export function CheckCIBIL() {
       {/* CIBIL Score Range & Meaning */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-secondary/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -517,7 +547,7 @@ export function CheckCIBIL() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -526,7 +556,7 @@ export function CheckCIBIL() {
           >
             {SCORE_RANGES.map((range, index) => (
               <motion.div key={index} variants={fadeInUp}>
-                 <motion.div whileHover={{ scale: 1.01, x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                <motion.div whileHover={{ scale: 1.01, x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
                   <Card className={`p-6 ${range.bgColor} border-none shadow-sm`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -538,7 +568,7 @@ export function CheckCIBIL() {
                         </div>
                         <p className="text-sm text-foreground mb-2">{range.description}</p>
                         <p className="text-xs font-semibold text-foreground/80 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3"/> {range.approval}
+                          <CheckCircle2 className="w-3 h-3" /> {range.approval}
                         </p>
                       </div>
                       <div className={`w-4 h-4 rounded-full ${range.color.replace('text', 'bg')} flex-shrink-0 mt-2`} />
@@ -554,19 +584,19 @@ export function CheckCIBIL() {
       {/* How to Check Your CIBIL Score for Free */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-             initial={{ opacity: 0, y: 20 }}
-             whileInView={{ opacity: 1, y: 0 }}
-             viewport={{ once: true }}
-             className="text-center mb-12"
-           >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How to Check Your CIBIL Score for Free</h2>
             <p className="text-lg text-muted-foreground">
               Simple 4-step process to access your credit score instantly
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -597,7 +627,7 @@ export function CheckCIBIL() {
       {/* Benefits of a High CIBIL Score */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -609,7 +639,7 @@ export function CheckCIBIL() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -636,7 +666,7 @@ export function CheckCIBIL() {
       {/* How Loans Buzz Helps Manage Your CIBIL Score */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -648,7 +678,7 @@ export function CheckCIBIL() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -675,7 +705,7 @@ export function CheckCIBIL() {
       {/* Tips to Improve Your CIBIL Score */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-white to-secondary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -687,7 +717,7 @@ export function CheckCIBIL() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -720,7 +750,7 @@ export function CheckCIBIL() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Form */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -761,17 +791,17 @@ export function CheckCIBIL() {
                   <div className="space-y-2">
                     <Label htmlFor="phone">Mobile Number *</Label>
                     <Input
-                      id="phone"
-                      name="phone"
+                      id="mobile"
+                      name="mobile"
                       type="tel"
-                      value={formData.phone}
+                      value={formData.mobile}
                       onChange={handleChange}
                       required
                       placeholder="98765 43210"
                       maxLength={10}
-                      className={`focus:ring-2 focus:ring-primary/20 ${errors.phone ? "border-red-500" : ""}`}
+                      className={`focus:ring-2 focus:ring-primary/20 ${errors.mobile ? "border-red-500" : ""}`}
                     />
-                    {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+                    {errors.mobile && <p className="text-xs text-red-500">{errors.mobile}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -803,25 +833,25 @@ export function CheckCIBIL() {
                     {errors.dob && <p className="text-xs text-red-500">{errors.dob}</p>}
                   </div>
 
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }} 
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start"
                   >
                     <AlertCircle className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-blue-800">
-                      Your information is completely secure and will only be used to fetch your CIBIL score. 
+                      Your information is completely secure and will only be used to fetch your CIBIL score.
                       We follow industry-standard security protocols.
                     </p>
                   </motion.div>
 
-                  <Button 
-                    type="submit" 
-                    size="lg" 
+                  <Button
+                    type="submit"
+                    size="lg"
                     className="w-full bg-primary hover:bg-primary/90 text-lg py-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
-                    disabled={isLoading}
+                    disabled={loading}
                   >
-                    {isLoading ? "Processing Request..." : "Get My CIBIL Score"}
+                    {loading ? "Processing Request..." : "Get My CIBIL Score"}
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center">
@@ -832,16 +862,16 @@ export function CheckCIBIL() {
             </motion.div>
 
             {/* Why Check Side Panel */}
-            <motion.div 
-               initial={{ opacity: 0, x: 30 }}
-               whileInView={{ opacity: 1, x: 0 }}
-               viewport={{ once: true }}
-               transition={{ duration: 0.8 }}
-               className="space-y-8"
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
             >
               <div>
                 <h2 className="text-3xl font-bold mb-6">Why Check Your CIBIL Score?</h2>
-                <motion.div 
+                <motion.div
                   variants={staggerContainer}
                   initial="hidden"
                   whileInView="visible"
@@ -850,7 +880,7 @@ export function CheckCIBIL() {
                 >
                   {WHY_CHECK_SCORE.map((item, index) => (
                     <motion.div key={index} variants={fadeInUp}>
-                       <motion.div whileHover={{ x: 5 }} transition={{ type: "spring" }}>
+                      <motion.div whileHover={{ x: 5 }} transition={{ type: "spring" }}>
                         <Card className="p-6 border-slate-100 hover:shadow-md transition-all">
                           <div className="flex items-start">
                             <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
@@ -875,17 +905,17 @@ export function CheckCIBIL() {
       {/* FAQ */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-10"
           >
-             <h2 className="text-3xl md:text-4xl font-bold mb-6">Frequently Asked Questions</h2>
-             <p className="text-muted-foreground">Everything you need to know about CIBIL scores</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground">Everything you need to know about CIBIL scores</p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -908,7 +938,7 @@ export function CheckCIBIL() {
                   </button>
                   <AnimatePresence>
                     {openFAQ === index && (
-                      <motion.div 
+                      <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}

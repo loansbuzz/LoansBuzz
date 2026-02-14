@@ -28,7 +28,7 @@ import {
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { motion, Variants } from 'framer-motion';
 import { useEffect, useState } from "react";
-import VerticalInfoTicker from './VerticalInfoTicker';
+import VerticalInfoTicker from './ScrollingNotice';
 
 // --- Animation Variants (Fully Typed) ---
 const fadeInUp: Variants = {

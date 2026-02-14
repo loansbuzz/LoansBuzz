@@ -28,7 +28,7 @@ export function Footer() {
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          
+
           {/* Column 1 - Brand */}
           <div className="flex flex-col space-y-4">
             <div className="text-2xl font-bold">
@@ -37,50 +37,51 @@ export function Footer() {
             <p className="text-sm text-gray-400 leading-relaxed">
               Loans Buzz is a digital marketplace for loans, credit cards, insurance, and investments.
             </p>
-            
+
             {/* Contact Details */}
             <div className="flex flex-col space-y-3 pt-2">
-              <a 
-                href="tel:1800-XXX-XXXX" 
+              <a
+                href="tel:1800-XXX-XXXX"
                 className="flex items-center space-x-2 text-sm text-gray-400 hover:text-primary transition-colors group"
               >
                 <Phone size={16} className="flex-shrink-0" />
-                <span className="group-hover:underline">1800-XXX-XXXX</span>
+                <span className="group-hover:underline">+91 90001 03922</span>
               </a>
-              <a 
-                href="mailto:info@loansbuzz.com" 
+              <a
+                href="mailto:info@loansbuzz.com"
                 className="flex items-center space-x-2 text-sm text-gray-400 hover:text-primary transition-colors group"
               >
                 <Mail size={16} className="flex-shrink-0" />
-                <span className="group-hover:underline">info@loansbuzz.com</span>
+                <span className="group-hover:underline">loansbuzz3@gmail.com
+                </span>
               </a>
             </div>
 
             {/* Social Icons */}
             <div className="flex items-center space-x-4 pt-2">
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-primary transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook size={20} />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-primary transition-colors"
                 aria-label="Twitter"
               >
                 <Twitter size={20} />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-primary transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-400 hover:text-primary transition-colors"
                 aria-label="Instagram"
               >

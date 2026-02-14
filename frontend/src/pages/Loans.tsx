@@ -329,7 +329,7 @@ export function Loans() {
       </section>
 
       {/* Sticky Navigation */}
-      <nav className={`bg-white border-b border-border transition-all duration-300 ${isNavSticky ? 'sticky top-16 md:top-18 z-40 shadow-md' : ''}`}>
+      {/* <nav className={`bg-white border-b border-border transition-all duration-300 ${isNavSticky ? 'sticky top-16 md:top-18 z-40 shadow-md' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex overflow-x-auto hide-scrollbar">
             {navigationItems.map((item) => (
@@ -347,7 +347,7 @@ export function Loans() {
             ))}
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Overview Section */}
       <section id="overview" className="py-16 md:py-20 bg-white">
@@ -658,7 +658,7 @@ export function Loans() {
             
             <motion.div variants={fadeInUp}>
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-                <Link to="/check-cibil">Calculate Your EMI</Link>
+                <Link to="/emi-calculator">Calculate Your EMI</Link>
               </Button>
             </motion.div>
           </motion.div>

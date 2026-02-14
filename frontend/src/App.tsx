@@ -14,18 +14,19 @@ import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Grievance } from './pages/Grievance';
-import VerticalInfoTicker from './pages/VerticalInfoTicker';
+import ScrollingNotice from './pages/ScrollingNotice';
+import { EMICalculator } from './pages/EMICalculator';
 
 function App() {
   return (
     <Router>
       {/* 🔹 FIXED VERTICAL INFO BOX (GLOBAL) */}
-      <VerticalInfoTicker />
 
       <div className="flex flex-col min-h-screen">
         <Navbar />
+        <ScrollingNotice />
 
-        <main className="flex-1">
+        <main className="flex-1 pt-[110px]">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
@@ -41,6 +42,7 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/grievance" element={<Grievance />} />
+            <Route path="emi-calculator" element={<EMICalculator />} />
           </Routes>
         </main>
 
