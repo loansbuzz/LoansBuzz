@@ -2664,7 +2664,12 @@ html {
 .animate-vertical-scroll {
   animation: verticalScroll 10s linear infinite;
 }
+<<<<<<< HEAD
 /* ---------- CUSTOM GREEN RANGE SLIDER ---------- */
+=======
+
+
+>>>>>>> 55ec53b10f30a870b345031071abe76ae7b404bb
 
 .custom-slider {
   -webkit-appearance: none;
@@ -2704,3 +2709,7 @@ html {
   border-radius: 50%;
   cursor: pointer;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 55ec53b10f30a870b345031071abe76ae7b404bb
