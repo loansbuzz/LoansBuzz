@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Loans } from './pages/Loans';
@@ -14,8 +15,12 @@ import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Grievance } from './pages/Grievance';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import ScrollingNotice from './pages/ScrollingNotice';
 import { EMICalculator } from './pages/EMICalculator';
+import { MyReports } from './pages/MyReports';
 
 function App() {
   return (
@@ -38,7 +43,22 @@ function App() {
             <Route path="/credit-cards" element={<CreditCards />} />
             <Route path="/mutual-funds" element={<MutualFunds />} />
             <Route path="/become-partner" element={<BecomePartner />} />
-            <Route path="/check-cibil" element={<CheckCIBIL />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path ="/my-reports" element={
+              <ProtectedRoute>
+                <MyReports />
+              </ProtectedRoute>
+            } />
+            <Route
+              path="/check-cibil"
+              element={
+                <ProtectedRoute>
+                  <CheckCIBIL />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />

@@ -350,20 +350,21 @@ export function BecomePartner() {
             })
           }
           className="
-            pointer-events-auto
-            px-8 py-3
-            bg-primary
-            text-white
-            rounded-full
-            font-bold
-            text-lg
-            shadow-2xl
-            hover:bg-primary/90
-            hover:-translate-y-1
-            active:scale-95
-            transition-all
-            duration-300
-          "
+    mt-8
+    pointer-events-auto
+    px-8 py-4
+    bg-primary
+    text-white
+    rounded-full
+    font-bold
+    text-lg
+    shadow-2xl
+    hover:bg-primary/90
+    hover:-translate-y-1
+    active:scale-95
+    transition-all
+    duration-300
+  "
         >
           Fill the Form
         </button>
