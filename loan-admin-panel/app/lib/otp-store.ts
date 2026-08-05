@@ -1,50 +1,44 @@
-import { randomInt } from "crypto";
+// app/lib/otp-store.ts
+import crypto from "crypto";
 import nodemailer from "nodemailer";
-
-export type OtpRecord = {
-  otp: string;
-  expiresAt: number;
-};
-
-const otpStore = new Map<string, OtpRecord>();
+import { connectDB } from "@/app/lib/mongos";
+import Otp from "@/app/lib/models/Otp"; // reuse your existing Mongoose model
 
 export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-export function createOtp(email: string) {
+function hashOtp(otp: string) {
+  return crypto.createHash("sha256").update(otp).digest("hex");
+}
+
+export async function createOtp(email: string) {
+  await connectDB();
   const normalizedEmail = normalizeEmail(email);
-  const otp = randomInt(100000, 999999).toString();
-  otpStore.set(normalizedEmail, {
-    otp,
-    expiresAt: Date.now() + 10 * 60 * 1000,
-  });
+  const otp = crypto.randomInt(100000, 999999).toString();
+  const otpHash = hashOtp(otp);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  // remove any previous unconsumed OTPs for this email, then create fresh
+  await Otp.deleteMany({ email: normalizedEmail });
+  await Otp.create({ email: normalizedEmail, otpHash, expiresAt, verified: false });
+
   return otp;
 }
 
-export function getOtp(email: string) {
+export async function consumeOtp(email: string, otp: string) {
+  await connectDB();
   const normalizedEmail = normalizeEmail(email);
-  return otpStore.get(normalizedEmail);
-}
+  const record = await Otp.findOne({ email: normalizedEmail });
 
-export function consumeOtp(email: string, otp: string) {
-  const normalizedEmail = normalizeEmail(email);
-  const record = otpStore.get(normalizedEmail);
-
-  if (!record) {
+  if (!record) return false;
+  if (record.expiresAt.getTime() < Date.now()) {
+    await record.deleteOne();
     return false;
   }
+  if (record.otpHash !== hashOtp(otp)) return false;
 
-  if (record.expiresAt < Date.now()) {
-    otpStore.delete(normalizedEmail);
-    return false;
-  }
-
-  if (record.otp !== otp) {
-    return false;
-  }
-
-  otpStore.delete(normalizedEmail);
+  await record.deleteOne();
   return true;
 }
 

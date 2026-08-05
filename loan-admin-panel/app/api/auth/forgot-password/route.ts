@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "No account found with that email." }, { status: 404 });
     }
 
-    const otp = createOtp(normalizedEmail);
+    const otp = await createOtp(normalizedEmail);
     await sendOtpEmail(normalizedEmail, otp);
 
     return NextResponse.json({ success: true, message: "OTP sent to your email." }, { status: 200 });
