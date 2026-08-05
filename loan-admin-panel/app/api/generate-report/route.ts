@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
           reportUrl: "",
           requestId,
           status: "failed",
-          vendorMessage: vendorMessage || vendorError,
+          // vendorMessage: vendorMessage || vendorError,
         });
 
         return NextResponse.json(
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
         reportUrl: "",
         requestId: null,
         status: "failed",
-        vendorMessage: errorMsg,
+        // vendorMessage: errorMsg,
       });
 
       return NextResponse.json(

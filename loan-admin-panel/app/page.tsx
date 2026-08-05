@@ -42,7 +42,7 @@ export default function Home() {
         {/* Welcome Section */}
         <div className="mb-10">
           <h2 className="text-3xl font-bold text-slate-900">Welcome back, Admin</h2>
-          <p className="text-slate-500 mt-1">Here is what's happening with your loan applications today.</p>
+          <p className="text-slate-500 mt-1">Here is what happening with your loan applications today.</p>
         </div>
 
         {/* DASHBOARD GRID */}

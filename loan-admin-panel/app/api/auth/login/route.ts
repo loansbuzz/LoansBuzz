@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     // 👈 2. Sign a real JWT token
     const token = jwt.sign(
       { id: safeUser.id, email: safeUser.email },
-      JWT_SECRET,
+      JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
