@@ -6,25 +6,21 @@ import { verifyToken } from "../../lib/auth";
 const VERIFYAL_TOKEN = process.env.VERIFYAL_TOKEN!;
 const VERIFYAL_API_KEY = process.env.VERIFYAL_API_KEY!;
 
-function corsHeaders(origin?: string) {
-  return {
-    "Access-Control-Allow-Origin": origin || "http://localhost:3001",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Max-Age": "86400",
-  };
-}
+// CORS headers allowing all origins
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Max-Age": "86400",
+};
 
-export async function OPTIONS(req: NextRequest) {
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders(req.headers.get("origin") || undefined),
-  });
+// Handle OPTIONS preflight request
+export async function OPTIONS() {
+  return NextResponse.json({}, { status: 200, headers: corsHeaders });
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const origin = req.headers.get("origin") || undefined;
     const authHeader = req.headers.get("authorization");
 
     // --- AUTHENTICATION CHECK ---
@@ -36,7 +32,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 401,
-          headers: corsHeaders(origin),
+          headers: corsHeaders,
         }
       );
     }
@@ -52,7 +48,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 401,
-          headers: corsHeaders(origin),
+          headers: corsHeaders,
         }
       );
     }
@@ -65,7 +61,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 401,
-          headers: corsHeaders(origin),
+          headers: corsHeaders,
         }
       );
     }
@@ -94,7 +90,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 400,
-          headers: corsHeaders(origin),
+          headers: corsHeaders,
         }
       );
     }
@@ -107,7 +103,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 400,
-          headers: corsHeaders(origin),
+          headers: corsHeaders,
         }
       );
     }
@@ -152,7 +148,7 @@ export async function POST(req: NextRequest) {
             },
             {
               status: 400,
-              headers: corsHeaders(origin),
+              headers: corsHeaders,
             }
           );
       }
@@ -168,7 +164,6 @@ export async function POST(req: NextRequest) {
           reportUrl: "",
           requestId,
           status: "failed",
-          // vendorMessage: vendorMessage || vendorError,
         });
 
         return NextResponse.json(
@@ -178,7 +173,7 @@ export async function POST(req: NextRequest) {
           },
           {
             status: 400,
-            headers: corsHeaders(origin),
+            headers: corsHeaders,
           }
         );
       }
@@ -203,7 +198,7 @@ export async function POST(req: NextRequest) {
           reportType,
         },
         {
-          headers: corsHeaders(origin),
+          headers: corsHeaders,
         }
       );
     } catch (err) {
@@ -218,7 +213,6 @@ export async function POST(req: NextRequest) {
         reportUrl: "",
         requestId: null,
         status: "failed",
-        // vendorMessage: errorMsg,
       });
 
       return NextResponse.json(
@@ -228,7 +222,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 400,
-          headers: corsHeaders(origin),
+          headers: corsHeaders,
         }
       );
     }
@@ -240,7 +234,7 @@ export async function POST(req: NextRequest) {
       },
       {
         status: 500,
-        headers: corsHeaders(req.headers.get("origin") || undefined),
+        headers: corsHeaders,
       }
     );
   }
@@ -283,9 +277,9 @@ async function generateCIBILReport(
   const vendorMessage = vendorJson?.message ?? "";
   const vendorError = vendorJson?.error ?? "";
 
-console.log("REPORT TYPE: cibil");
-console.log("STATUS:", vendorRes.status);
-console.log("VERIFYAL RESPONSE:", JSON.stringify(vendorJson, null, 2));
+  console.log("REPORT TYPE: cibil");
+  console.log("STATUS:", vendorRes.status);
+  console.log("VERIFYAL RESPONSE:", JSON.stringify(vendorJson, null, 2));
   return { vendorRes, vendorJson, reportUrl, requestId, vendorMessage, vendorError };
 }
 
@@ -322,9 +316,9 @@ async function generateExperianReport(
   const vendorMessage = vendorJson?.message ?? "";
   const vendorError = vendorJson?.error ?? "";
 
-console.log("REPORT TYPE: experian");
-console.log("STATUS:", vendorRes.status);
-console.log("VERIFYAL RESPONSE:", JSON.stringify(vendorJson, null, 2));
+  console.log("REPORT TYPE: experian");
+  console.log("STATUS:", vendorRes.status);
+  console.log("VERIFYAL RESPONSE:", JSON.stringify(vendorJson, null, 2));
   return { vendorRes, vendorJson, reportUrl, requestId, vendorMessage, vendorError };
 }
 
@@ -358,9 +352,9 @@ async function generateCRIFReport(
   const vendorMessage = vendorJson?.message ?? "";
   const vendorError = vendorJson?.error ?? "";
 
-console.log("REPORT TYPE: crif");
-console.log("STATUS:", vendorRes.status);
-console.log("VERIFYAL RESPONSE:", JSON.stringify(vendorJson, null, 2));
+  console.log("REPORT TYPE: crif");
+  console.log("STATUS:", vendorRes.status);
+  console.log("VERIFYAL RESPONSE:", JSON.stringify(vendorJson, null, 2));
 
   return { vendorRes, vendorJson, reportUrl, requestId, vendorMessage, vendorError };
 }
@@ -438,7 +432,6 @@ async function generateCIBILScoreOnly(
   );
 
   const vendorJson = await vendorRes.json();
-  // Score-only returns score in response, not a URL
   const score = vendorJson?.data?.score;
   const reportUrl = vendorJson?.data?.report_url || `score:${score}`;
   const requestId = vendorJson?.request_uid ?? null;
