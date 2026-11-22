@@ -11,7 +11,8 @@ import {
   ExternalLink, Loader
 } from 'lucide-react';
 import { motion, Variants, AnimatePresence, delay } from 'framer-motion';
-import CibilScoreModal from './CibilScoreModal';
+import CibilScoreModal, { type CibilScoreResponse } from './CibilScoreModal';
+import CibilDetailedReport, { type CibilDetailedResponse } from './CibilDetailedReport';
 import { getAuthToken, API_BASE_URL } from '../lib/auth';
 
 // --- ANIMATION VARIANTS ---
@@ -281,6 +282,9 @@ const FAQS = [
 export function CheckCIBIL() {
   const [formData, setFormData] = useState({
     fullName: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
     email: '',
     mobile: '',
     pan: '',
@@ -296,7 +300,8 @@ export function CheckCIBIL() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [scoreData, setScoreData] = useState<any>(null);
+  const [scoreData, setScoreData] = useState<CibilScoreResponse | null>(null);
+  const [cibilReport, setCibilReport] = useState<CibilDetailedResponse | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
 
@@ -311,6 +316,8 @@ export function CheckCIBIL() {
   const [successMessage, setSuccessMessage] = useState('');
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
+  const isCibil = formData.reportType === "cibil-pdf" || formData.reportType === "cibil-score-only";
+
   // --- FORM VALIDATION ---
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -322,12 +329,14 @@ export function CheckCIBIL() {
     }
 
     // Phone Regex: 10 digits
-    const phoneRegex = /^[0-9]{10}$/;
+    const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(formData.mobile)) {
-      newErrors.phone = "Please enter a valid 10-digit mobile number";
+      newErrors.mobile = "Please enter a valid 10-digit mobile number";
     }
 
-    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
+    if (isCibil) {
+      if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    } else if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
     if (!formData.email.includes('@')) newErrors.email = "Invalid email address";
     if (!emailVerified) newErrors.email = "Please verify your email before submitting";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
@@ -422,6 +431,7 @@ export function CheckCIBIL() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (loading || generatingReport) return;
     if (!validateForm()) return;
 
     if (!emailVerified) {
@@ -431,17 +441,13 @@ export function CheckCIBIL() {
 
     setLoading(true);
     setSuccessMessage('');
+    setCibilReport(null);
+    setScoreData(null);
+    setShowResult(false);
     setGeneratingReport(true);
 
     try {
-      // 1️⃣ Register user (internal backend)
-      await fetch("https://api.loansbuzz.in/api/v1/user/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      }).catch(err => console.log("User registration (non-critical):", err));
-
-      // 2️⃣ GET AUTH TOKEN
+      // 1️⃣ GET AUTH TOKEN (no separate registration/payment request)
       const authToken = typeof window !== "undefined" ? getAuthToken() : null;
       if (!authToken) {
         setErrors(prev => ({ ...prev, reportType: "Please log in to generate a report" }));
@@ -452,7 +458,8 @@ export function CheckCIBIL() {
 
       // 3️⃣ CALL GENERATE REPORT ENDPOINT
       const payload: Record<string, any> = {
-        name: formData.fullName,
+        name: isCibil ? [formData.firstName, formData.middleName, formData.lastName].map(v => v.trim()).filter(Boolean).join(" ") : formData.fullName.trim(),
+        ...(isCibil ? { cust_fname: formData.firstName.trim(), cust_mname: formData.middleName.trim(), cust_lname: formData.lastName.trim() } : {}),
         mobile: formData.mobile,
         pan_card: formData.pan,
         gender: formData.gender,
@@ -479,54 +486,40 @@ export function CheckCIBIL() {
 
       const data = await res.json();
 
-      if (!data.success) {
-        setErrors(prev => ({ ...prev, reportType: data.error || "Failed to generate report" }));
+      if (!res.ok || data?.success !== true) {
+        const message = res.status === 401 ? "Your session has expired or is invalid. Please log in again." : data?.verificationPending ? "Customer verification is pending. Confirm with the provider before requesting again." : data?.error || "Failed to generate report";
+        setErrors(prev => ({ ...prev, reportType: message }));
         setLoading(false);
         setGeneratingReport(false);
         return;
       }
 
-      // 4️⃣ HANDLE RESPONSE BASED ON REPORT TYPE
-      if (formData.reportType === "cibil-score-only") {
-        // Score-only: just show modal with score
+      // Use the current API contract, not the old PDF response format.
+      if (data.reportType !== formData.reportType) {
+        setErrors(prev => ({ ...prev, reportType: "Unexpected report type. Check report history before submitting again." }));
+        return;
+      }
+      if (data.reportType === "cibil-score-only") {
+        setCibilReport(null);
         setScoreData(data);
         setShowResult(true);
-        setSuccessMessage('✅ CIBIL Score retrieved successfully!');
+        setSuccessMessage("CIBIL score request completed.");
+      } else if (data.reportType === "cibil-pdf") {
+        setShowResult(false);
+        setCibilReport(data);
+        setSuccessMessage("CIBIL detailed report retrieved successfully!");
+      } else if (typeof data.reportUrl === "string" && /^https:\/\//i.test(data.reportUrl)) {
+        window.open(data.reportUrl, "_blank", "noopener,noreferrer");
+        setSuccessMessage("Credit report retrieved successfully!");
       } else {
-        // PDF Reports: open in new tab
-        if (data.reportUrl && !data.reportUrl.startsWith("score:")) {
-          window.open(data.reportUrl, "_blank", "noopener,noreferrer");
-          setSuccessMessage(`✅ ${formData.reportType.toUpperCase()} report opened in a new tab!`);
-        }
-        setScoreData(data);
+        setErrors(prev => ({ ...prev, reportType: "The provider did not return a valid PDF URL." }));
       }
 
-      // Reset form after success
-      setTimeout(() => {
-        setFormData({
-          fullName: '',
-          email: '',
-          mobile: '',
-          pan: '',
-          dob: '',
-          gender: '',
-          employmentType: '',
-          reportType: '',
-          consent: '',
-          salaryAmount: '',
-          address: '',
-          state: '',
-          pincode: '',
-        });
-        setEmailVerified(false);
-        setOtpSent(false);
-        setOtp('');
-      }, 2000);
     } catch (err) {
       console.error(err);
       setErrors(prev => ({
         ...prev,
-        reportType: "An error occurred while generating the report. Please try again."
+        reportType: "The request outcome could not be confirmed. Check report history or provider status before submitting again."
       }));
     } finally {
       setLoading(false);
@@ -564,6 +557,9 @@ export function CheckCIBIL() {
   return (
     <div className="min-h-screen w-screen overflow-x-hidden">
       <CibilScoreModal showResult={showResult} setShowResult={setShowResult} scoreData={scoreData} />
+      {cibilReport && (
+        <CibilDetailedReport report={cibilReport} onClose={() => setCibilReport(null)} />
+      )}
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary/10 via-white to-secondary/10 py-16 md:py-24 relative overflow-hidden">
@@ -772,7 +768,43 @@ export function CheckCIBIL() {
 
               <Card className="p-8 shadow-xl border-slate-100">
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Full Name */}
+                  {/* Report Type */}
+                  <div className="space-y-2">
+                    <Label htmlFor="reportType">Select Report *</Label>
+                    <select
+                      id="reportType"
+                      name="reportType"
+                      value={formData.reportType}
+                      onChange={handleChange}
+                      required
+                      className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none ${errors.reportType ? "border-red-500" : "border-input"
+                        }`}
+                    >
+                      <option value="" disabled>
+                        Choose a report type
+                      </option>
+                      <option value="cibil-pdf">📊 CIBIL Detailed Report (Online)</option>
+                      {/* <option value="experian-pdf">📊 Experian PDF Report</option> */}
+                      {/* <option value="crif-pdf">📊 CRIF PDF Report</option> */}
+                      {/* <option value="equifax-pdf">📊 Equifax PDF Report</option> */}
+                      <option value="cibil-score-only">⚡ CIBIL Score Only (Instant)</option>
+                    </select>
+                    {errors.reportType && <p className="text-xs text-red-500">{errors.reportType}</p>}
+                  </div>
+
+                  {/* Choose the report type below to select the matching name fields. */}
+                  {isCibil ? (
+                    <div className="space-y-3">
+                      <Label>Customer name (as per PAN)</Label>
+                      {([['firstName', 'First name *'], ['middleName', 'Middle name (if applicable)'], ['lastName', 'Last name (if applicable)']] as const).map(([field, label]) => (
+                        <div key={field} className="space-y-1">
+                          <Label htmlFor={field}>{label}</Label>
+                          <Input id={field} name={field} value={formData[field]} onChange={handleChange} required={field === 'firstName'} />
+                          {errors[field] && <p className="text-xs text-red-500">{errors[field]}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name (as per PAN) *</Label>
                     <Input
@@ -786,6 +818,8 @@ export function CheckCIBIL() {
                     />
                     {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
                   </div>
+
+                  )}
 
                   {/* Email */}
                   <div className="space-y-2">
@@ -992,30 +1026,6 @@ export function CheckCIBIL() {
                     {errors.salaryAmount && <p className="text-xs text-red-500">{errors.salaryAmount}</p>}
                   </div>
 
-                  {/* Report Type */}
-                  <div className="space-y-2">
-                    <Label htmlFor="reportType">Select Report *</Label>
-                    <select
-                      id="reportType"
-                      name="reportType"
-                      value={formData.reportType}
-                      onChange={handleChange}
-                      required
-                      className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none ${errors.reportType ? "border-red-500" : "border-input"
-                        }`}
-                    >
-                      <option value="" disabled>
-                        Choose a report type
-                      </option>
-                      <option value="cibil-pdf">📊 CIBIL PDF Report</option>
-                      {/* <option value="experian-pdf">📊 Experian PDF Report</option> */}
-                      {/* <option value="crif-pdf">📊 CRIF PDF Report</option> */}
-                      {/* <option value="equifax-pdf">📊 Equifax PDF Report</option> */}
-                      {/* <option value="cibil-score-only">⚡ CIBIL Score Only (Instant)</option> */}
-                    </select>
-                    {errors.reportType && <p className="text-xs text-red-500">{errors.reportType}</p>}
-                  </div>
-
                   {/* Conditional Equifax Fields */}
                   {formData.reportType === "equifax-pdf" && (
                     <motion.div
@@ -1119,13 +1129,13 @@ export function CheckCIBIL() {
                     ) : (
                       <>
                         <ExternalLink className="w-4 h-4" />
-                        Get Report (Opens in New Tab)
+                        Get Credit Report
                       </>
                     )}
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center">
-                    By clicking submit, you consent to Loans Buzz fetching your credit report and agree to the ₹199 processing fee.
+                    By submitting, you authorize Loans Buzz to fetch the selected credit report. No payment is collected in this flow.
                   </p>
                 </form>
               </Card>

@@ -19,22 +19,17 @@ if (!JWT_SECRET && typeof window === "undefined") {
 // --- Server-side: sign and verify JWTs ---
 
 export function signToken(user: AuthUser): string {
-  return jwt.sign(user, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(user, JWT_SECRET, { expiresIn: "7d", algorithm: "HS256" });
 }
 export function verifyToken(token: string): AuthUser | null {
   try {
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    ) as AuthUser;
-
-    console.log("Decoded:", decoded);
-
-    return decoded;
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return null;
+    const decoded = jwt.verify(token, secret, { algorithms: ["HS256"] });
+    if (typeof decoded === "string" || typeof decoded.id !== "string" || !decoded.id.trim()) return null;
+    return decoded as AuthUser;
   } catch (err) {
-    console.error("JWT VERIFY ERROR:", err);
+    console.warn("[AUTH] JWT verification failed", { reason: err instanceof Error ? err.name : "Unknown" });
     return null;
   }
 }
@@ -62,7 +57,9 @@ export  function getAuth(): AuthUser | null {
   const token = getAuthToken();
   if (!token) return null;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const encoded = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(encoded), c => c.charCodeAt(0))));
+    if (typeof payload.exp !== "number" || payload.exp <= Date.now() / 1000 || typeof payload.id !== "string") { clearAuth(); return null; }
     return { id: payload.id, name: payload.name, email: payload.email };
   } catch {
     clearAuth();
